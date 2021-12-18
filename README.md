@@ -1,6 +1,5 @@
 # Scoreboard-esp01-neopixel
-Scoreboard project using:
-<br>
+<h3>Scoreboard project using:</h3>
 Hardware:
   <ul>
     <li>ESP-01 module</li>
