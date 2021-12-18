@@ -1,0 +1,131 @@
+* {
+	box-sizing:				border-box;
+}
+
+:root {
+/* 	--bgColorBody:			#80c1ff;
+	--colorDark:			#000088;
+	--colorMedium:			#005cb3;
+	--colorLight: 			#cce6ff;
+ */
+	--bgColorBody:			#98fb98;
+	--colorDark:			#006400;
+	--colorMedium:			#208820;
+	--colorLight: 			#ddffdd;
+}
+
+body {
+	background-color: 		var(--bgColorBody);
+	Color: 					var(--colorDark);
+	font-family: 			Arial, Helvetica, Sans-Serif;
+	min-width: 				420px;
+	margin-left: 			auto;
+	margin-right: 			auto;
+	text-align: 			center;
+}
+
+header {
+	background-color:		var(--colorLight);
+	color:					var(--colorDark);
+	margin-bottom: 			25px;
+	padding:				20px;
+}
+
+header img {
+	display: 				inline-block;
+	width: 					90px;
+	margin: 				auto;
+}
+
+h1 {
+	display: 				inline-block;
+	font-size: 				2.5em;
+	margin: 				0 10px;
+	padding: 				0 10px;
+}
+
+.btnPanel {
+	display:				block;
+	padding: 				12px 2px;
+}
+
+label {
+	display: 				inline-block;
+	width: 					88px;
+}
+
+iframe {
+	margin: 				12px;
+	height: 				48px;
+}
+
+.slrPanel label {
+	width: 					auto;
+}
+
+.inputScoreBox {
+	display: 				inline-block;
+	background-color:		var(--colorLight);
+	color:					var(--colorMedium);
+	width:					72px;
+	font-size: 				1.8em;
+	text-align:				center;
+}
+
+.btn {
+	display: 				inline-block;
+	background-color: 		var(--colorMedium);
+	color: 					var(--colorLight);
+    border: 				none;
+	border-radius: 			4px;
+    font-size: 				1.5em;
+	text-align:				center;
+	margin: 				0px 5px;
+    padding: 				8px 30px;
+	width: 					72px;
+    cursor: 				pointer;
+	box-shadow:				0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.update {
+	width:					360px;
+}
+
+.update:active {
+	background-color:	 	#3e8e41;
+	box-shadow:				0 5px #666;
+	transform: 				translateY(4px);
+}
+	
+.btn:hover {
+	background: 			var(--colorLight);
+	color:					var(--colorMedium);
+}
+
+.slider {
+	display: 				inline-block;
+    appearance: 			none;
+    background: 			var(--colorLight);
+    width: 					240px;
+    height: 				15px;
+	margin-bottom: 			20px;
+    outline: 				none;
+    opacity:				0.7;
+    -webkit-transition: 	0.2s;
+    transition: 			opacity 0.2s;	
+	box-shadow:				0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.slider:hover {
+    opacity: 				1;
+}
+
+.slider::-webkit-slider-thumb {
+    appearance: 			none;
+    width: 					36px;
+    height: 				36px;
+	border: 				0;
+	background: 			url('Ball36.png');
+    cursor: 				pointer;
+}
+

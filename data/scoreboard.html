@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Scoreboard</title>
+	<link rel="stylesheet" type="text/css" href="scoreboard.css">
+</head>
+<body>
+	<header>
+		<img src="Ball90.png" alt="Ball"><h1>Scoreboard</h1>
+	</header>
+	<form action="update" target="responseframe">
+		<section class="btnPanel">
+			<label for="score">Score:</label>
+			<button type="button" class="btn count" data-dir="-1" onclick="clickHandler(this)">-</button>				
+			<input type="text" class="inputScoreBox" id="score" name="score" value="0" onblur="blurHandler(this)">
+			<button type="button" class="btn count" data-dir="1" onclick="clickHandler(this)">+</button>				
+		</section>
+		<section class="btnPanel">
+			<label for="overs">Overs:</label>
+			<button type="button" class="btn count" data-dir="-1" onclick="clickHandler(this)">-</button>
+			<input type="text" class="inputScoreBox" id="overs" name="overs" value="0" onblur="blurHandler(this)">
+			<button type="button" class="btn count" data-dir="1" onclick="clickHandler(this)">+</button>
+		</section>
+		<section class="btnPanel">
+			<label for="wicket">Wickets:</label>
+			<button type="button" class="btn count" data-dir="-1" onclick="clickHandler(this)">-</button>
+			<input type="text" class="inputScoreBox" id="wicket" name="wicket" value="0" onblur="blurHandler(this)">
+			<button type="button" class="btn count" data-dir="1" onclick="clickHandler(this)">+</button>
+		</section>
+		<section class="btnPanel">
+			<label for="target">Target:</label>
+			<button type="button" class="btn count" data-dir="-1" onclick="clickHandler(this)">-</button>
+			<input type="text" class="inputScoreBox" id="target" name="target" value="0" onblur="blurHandler(this)">
+			<button type="button" class="btn count" data-dir="1" onclick="clickHandler(this)">+</button>
+		</section>
+		<section class="btnPanel slrPanel">
+			<label for="brightness">Brightness: L </label> 
+			<input type="range" id="brightness" class="slider" name="brightness" min="0" max="100" step="10" value="70">
+			<label style="width: auto;">H</label>
+		</section>
+		<section style="display: none;">
+			<input type="text" id="seconds" name="seconds" value="0">
+		</section>
+		<input type="submit" class="btn update" value="Update">
+	</form>
+	<iframe name="responseframe" id="responseframe"></iframe>	
+	<script src="scoreboard.js"></script>
+</body>
+</html>
