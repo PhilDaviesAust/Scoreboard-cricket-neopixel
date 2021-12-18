@@ -22,7 +22,7 @@
 #define DATA_PIN    2
 #define RGB_ORDER   GRB
 #define CHIPSET     WS2812
-#define NUM_LEDS    588
+#define NUM_LEDS    4
 #define BRIGHTNESS  50
 
 CRGB leds[NUM_LEDS];
