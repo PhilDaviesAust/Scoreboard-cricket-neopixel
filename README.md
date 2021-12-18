@@ -4,7 +4,7 @@ Scoreboard project using:
 Hardware:
   <ul>
     <li>ESP-01 module</li>
-    <li>WS2815 addressable LED strip</li>
+    <li>WS2812/WS2815 addressable LED strip</li>
   </ul>
  Libraries:
   <ul>
