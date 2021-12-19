@@ -5,6 +5,7 @@
 #include "LittleFS.h"
 #include <FastLED.h>
 #include "credentials.h"
+#include "varDeclaration.h"
 
 #define DEBUG_STATE true
 #if DEBUG_STATE
@@ -22,7 +23,7 @@
 #define DATA_PIN    2
 #define RGB_ORDER   GRB
 #define CHIPSET     WS2812
-#define NUM_LEDS    4
+#define NUM_LEDS    594
 #define BRIGHTNESS  50
 
 CRGB leds[NUM_LEDS];
@@ -109,6 +110,18 @@ void setup() {
   FastLED.addLeds<CHIPSET, DATA_PIN, RGB_ORDER>(leds, NUM_LEDS);
   FastLED.setBrightness( BRIGHTNESS );
   pinMode(LED_BUILTIN, OUTPUT);
+
+  int buff[NUM_LEDS];
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    //turn on led
+    buff[i] = i*2%2;
+  }
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    (buff[i]==1) ? leds[i] = CRGB::Green : leds[i] = CRGB::Black;
+  }
+
 }
 ///////////////////////////////////////////////////////////////////////////////
 void loop() {
