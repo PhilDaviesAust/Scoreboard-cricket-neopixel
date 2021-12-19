@@ -24,10 +24,13 @@
 #define RGB_ORDER   GRB
 #define CHIPSET     WS2812
 #define NUM_LEDS    594
+#define LEDS_IN_SEGMENT  6
+#define SEGMENTS    7
 #define BRIGHTNESS  50
 
 CRGB leds[NUM_LEDS];
 AsyncWebServer server(80);
+int blink;
 
 ///////////////////////////////////////////////////////////////////////////////
 String getContentType(String url){
@@ -64,7 +67,55 @@ void handleServeFile(AsyncWebServerRequest *request) {
   else {
     request->send(404, "text/plain", url + " Not found");
   }
+} // end of handleServeFile
+///////////////////////////////////////////////////////////////////////////////
+void updateLEDs(){
+  // i = index of buffchar
+  // indx = index of mapping array
+  // j = segment number
+  // k = index of LED in segment
+  int indx, offset;
+  CRGB colour;
+  for (int i = 0; i < 10; i++) {          // cycle through characters in buffchar
+    if((indx = (int)buffchr[i]-48) < 0) indx = 10;
+    for (int j = 0; j < SEGMENTS; j++)    // cycle through segments in character
+    {
+      if(seg_mapping[indx][j]) colour = CRGB::Green; else colour = CRGB::Black;
+      offset = i * SEGMENTS * LEDS_IN_SEGMENT + j * LEDS_IN_SEGMENT;
+      leds[offset] = colour;
+      for (int k = 1; k < LEDS_IN_SEGMENT; k++)   // cycle through LEDS in segment
+      {
+        leds[offset+k] = leds[offset];
+      } 
+    }
+  }
+  FastLED.show();     // TODO don't want to do this here scheduler should take care of updates
 }
+///////////////////////////////////////////////////////////////////////////////
+void handleUpdate( AsyncWebServerRequest *request){
+  String score = request->arg("score");
+  String overs = request->arg("overs");
+  String wicket = request->arg("wicket");
+  String target = request->arg("target");
+  String brightness = request->arg("brightness");
+  seconds = request->arg("seconds").toInt();
+
+  snprintf (buffchr, sizeof(buffchr), PSTR("%3s%3s%2s%2s"), 
+            request->arg(F("score")),
+            request->arg(F("target")),
+            request->arg(F("overs")),
+            request->arg(F("wicket")));
+
+
+  request->send(200, "text/plain",  "score:" + score + \
+                                    " overs:" + overs + \
+                                    " wickets:" + wicket + \
+                                    " target:" + target + \
+                                    " brightness:" + brightness + \
+                                    " seconds:" + seconds);
+  updateLEDs();
+  Serialprintln("update complete");
+} // end of handleUpdate
 ///////////////////////////////////////////////////////////////////////////////
 void setup() {
   Serialbegin(115200);
@@ -92,50 +143,20 @@ void setup() {
   Serialprintf("\nIP Address: %s\n", WiFi.localIP().toString().c_str());
 //-------------------------------------------------------------
   // Start web server
-  server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
-    String score = request->arg("score");
-    String overs = request->arg("overs");
-    String wicket = request->arg("wicket");
-    String target = request->arg("target");
-
-    request->send(200, "text/plain", "update request - score:" + score + \
-                                      " overs:" + overs + " wickets:" + \
-                                      wicket + " target:" + target);
-    Serialprintln("update complete");
-  });
-  server.onNotFound(handleServeFile);  // any other url
+  server.on("/update", HTTP_GET, handleUpdate);
+  server.onNotFound(handleServeFile);       // any other url
   server.begin();
 //-------------------------------------------------------------
-  // fastLED initialisation
+  // fastLED initialisation   //TODO should do this first up to limit current
   FastLED.addLeds<CHIPSET, DATA_PIN, RGB_ORDER>(leds, NUM_LEDS);
   FastLED.setBrightness( BRIGHTNESS );
   pinMode(LED_BUILTIN, OUTPUT);
 
-  int buff[NUM_LEDS];
-  for (int i = 0; i < NUM_LEDS; i++)
-  {
-    //turn on led
-    buff[i] = i*2%2;
-  }
-  for (int i = 0; i < NUM_LEDS; i++)
-  {
-    (buff[i]==1) ? leds[i] = CRGB::Green : leds[i] = CRGB::Black;
-  }
-
-}
+} // end of setup
 ///////////////////////////////////////////////////////////////////////////////
 void loop() {
-
-  leds[0] = CRGB::Red;
-  leds[1] = CRGB::Green;
-  leds[2] = CRGB::Blue;
-  leds[3] = CRGB::Black;
-  FastLED.show();
-
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  Serialprintln(leds[2]);
-
+  EVERY_N_MILLIS (500) {
+    blink++;
+    digitalWrite(LED_BUILTIN, blink%2);
+  };
 }
