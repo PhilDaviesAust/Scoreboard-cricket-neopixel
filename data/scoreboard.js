@@ -1,4 +1,19 @@
 let interval = setInterval(displayTime, 1000);
+let timeupdate = setInterval(updateTime, 60 * 1000);
+
+function updateTime(){
+    let d = new Date();
+    let seconds = d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds();
+    let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function(){
+        if(this.readyState == 4 && this.status == 200){
+            document.getElementById("responseframe").innerHTML = this.responseText;
+        }
+    };
+    xhttp.open("GET", "/time?seconds=" + seconds, true);
+    xhttp.send();
+}
+
 function displayTime(){				//current time of day in seconds
     const d = new Date();
     const seconds = d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds(); 
