@@ -6,37 +6,21 @@
 #include <FastLED.h>
 #include "credentials.h"
 #include "varDeclaration.h"
-//#include "TimeKeeper.h"
 
-#define DEBUG_STATE true
-#if DEBUG_STATE
-  #define Serialprint(...) Serial.print(__VA_ARGS__)
-  #define Serialprintln(...) Serial.println(__VA_ARGS__)
-  #define Serialprintf(...) Serial.printf(__VA_ARGS__)
-  #define Serialbegin(baud) Serial.begin(baud)
-#else
-  #define Serialprint(...)
-  #define Serialprintln(...)
-  #define Serialprintf(...)
-  #define Serialbegin(baud)
-#endif
-
-#define DATA_PIN        2
+#define DATA_PIN        4
 #define RGB_ORDER       GRB
-#define CHIPSET         WS2812
+#define CHIPSET         WS2812  // may need to be WS2813
 #define NUM_LEDS        594
 #define LEDS_IN_SEGMENT 6
 #define SEGMENTS        7
 #define BRIGHTNESS      50
 
 CRGBArray<NUM_LEDS> leds;
-const CRGB Green = CRGB::Green;
-const CRGB Black = CRGB::Black;
-
-//TimeKeeper tk;
+const CRGB C_ON   = CRGB::Yellow;
+const CRGB C_OFF  = CRGB::Black;
+CRGB colour;
 
 AsyncWebServer server(80);
-int blink;
 
 ///////////////////////////////////////////////////////////////////////////////
 String getContentType(String url){
@@ -62,7 +46,6 @@ String formatBytes(size_t bytes){
 ///////////////////////////////////////////////////////////////////////////////
 void updateTime(){
   int indx, ledNo, offset= 10 * SEGMENTS * LEDS_IN_SEGMENT;
-  CRGB colour;
   uint32_t now = ((millis() - baseMillis)/1000) + baseSeconds;
   uint8_t hours = (now/3600) % 12;
   uint8_t minutes = (now/60) % 60;
@@ -73,36 +56,34 @@ void updateTime(){
     //Serialprintf("Character: %i\n", indx);
     for (int segNo = 0; segNo < SEGMENTS; segNo++)  // cycle through segments in character
     {
-      if(seg_mapping[indx][segNo]) colour = Green; else colour = Black;
+      colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
       ledNo = charNo * SEGMENTS * LEDS_IN_SEGMENT + segNo * LEDS_IN_SEGMENT + offset;
       leds(ledNo, ledNo+5) = colour;
       //Serialprintf("char: %i seg: %i led: %i value: %i\n", charNo, segNo, ledNo, colour.g);
     }
   } 
-}
+} // end of updateTime
 ///////////////////////////////////////////////////////////////////////////////
 void updateLEDs(){
   int indx, ledNo;
-  CRGB colour;
   for (uint8_t charNo = 0; charNo < sizeof(buffchr)-1; charNo++) {    // cycle through characters in buffchar
     if((indx = (int)buffchr[charNo]-48) < 0) indx = 10;
     Serialprintf("Character: %i\n", indx);
     for (int segNo = 0; segNo < SEGMENTS; segNo++)                // cycle through segments in character
     {
-      if(seg_mapping[indx][segNo]) colour = Green; else colour = Black;
+      colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
       ledNo = charNo * SEGMENTS * LEDS_IN_SEGMENT + segNo * LEDS_IN_SEGMENT;
       leds(ledNo, ledNo+5) = colour;
       Serialprintf("char: %i seg: %i led: %i value: %i\n", charNo, segNo, ledNo, colour.g);
     }
   }
-  for (int i = 0; i < NUM_LEDS; i++)
-  {
-    if(i%42 == 0) Serialprintf("\ncharacter %i\n", i/42);
-    if(i%6 == 0) Serialprintln(i);
-    Serialprintf("led[%i] %i\n", i, leds[i].g);
-  }
-  
-  FastLED.show();     // TODO don't want to do this here scheduler should take care of updates
+  //  print full led array
+  // for (int i = 0; i < NUM_LEDS; i++)
+  // {
+  //   if(i%42 == 0) Serialprintf("\ncharacter %i\n", i/42);
+  //   if(i%6 == 0) Serialprintln(i);
+  //   Serialprintf("led[%i] %i\n", i, leds[i].g);
+  // }
 } // end of updateLEDs
 ///////////////////////////////////////////////////////////////////////////////
 void handleServeFile(AsyncWebServerRequest *request) {
@@ -119,7 +100,9 @@ void handleServeFile(AsyncWebServerRequest *request) {
 } // end of handleServeFile
 ///////////////////////////////////////////////////////////////////////////////
 void handleUpdate( AsyncWebServerRequest *request){
-  String brightness = request->arg("brightness");
+  String brightness = request->arg("brightness"); //TODO do something with this
+  baseSeconds = (request->arg("seconds")).toInt();
+  baseMillis = millis();
 
   snprintf (buffchr, sizeof(buffchr), PSTR("%3s%3s%2s%2s"), 
             request->arg(F("score")),
@@ -139,13 +122,22 @@ void handleUpdate( AsyncWebServerRequest *request){
   Serialprintln("update complete");
 } // end of handleUpdate
 ///////////////////////////////////////////////////////////////////////////////
-void handleTimeUpdate(AsyncWebServerRequest *request){
-  baseSeconds = (request->arg("seconds")).toInt();
-  baseMillis = millis();
-  updateTime();
-  Serialprintf("time updated %i, %i\n", baseSeconds, baseMillis);
-  request->send(200, "text/plain", "time updated");
-} // end of handleTimeUpdate
+void scheduler() {
+  schedCount++;
+  digitalWrite(LED_BUILTIN, schedCount%2);  // blink builtin LED 1Hz cycle
+
+  colour = (schedCount%2 == 0) ? C_ON : C_OFF;
+  leds(588, 593) = colour;                  // pulse the clock :
+
+  if(schedCount == 1) {
+    updateTime();
+    Serialprintf("Time updated:%i %i\n", baseMillis, baseSeconds);
+  }
+
+  FastLED.show();
+
+  schedCount = schedCount % 60;
+} // end of scheduler
 ///////////////////////////////////////////////////////////////////////////////
 void setup() {
   Serialbegin(115200);
@@ -181,14 +173,10 @@ void setup() {
 //-------------------------------------------------------------
   // Start web server
   server.on("/update", HTTP_GET, handleUpdate);
-  server.on("/time", HTTP_GET, handleTimeUpdate);
   server.onNotFound(handleServeFile);       // any other url
   server.begin();
 } // end of setup
 ///////////////////////////////////////////////////////////////////////////////
 void loop() {
-  EVERY_N_MILLIS (500) {
-    blink++;
-    digitalWrite(LED_BUILTIN, blink%2);
-  };
+  EVERY_N_MILLIS (schedInt) {scheduler();}
 }

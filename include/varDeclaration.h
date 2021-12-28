@@ -1,3 +1,15 @@
+#define DEBUG_STATE true
+#if DEBUG_STATE
+  #define Serialprint(...) Serial.print(__VA_ARGS__)
+  #define Serialprintln(...) Serial.println(__VA_ARGS__)
+  #define Serialprintf(...) Serial.printf(__VA_ARGS__)
+  #define Serialbegin(baud) Serial.begin(baud)
+#else
+  #define Serialprint(...)
+  #define Serialprintln(...)
+  #define Serialprintf(...)
+  #define Serialbegin(baud)
+#endif
 
 const uint8_t seg_mapping[16][7] = {
 //   A B C D E F G 
@@ -22,6 +34,6 @@ char          buffchr[11];            // character buffer for character display
 char          bufftime[5];            // character buffer for time display
 uint32_t      baseSeconds = 0;        // time stamp in seconds
 uint32_t      baseMillis  = 0;        // time stamp in millis
-uint8_t       schedInt    = 1;        // scheduler time interval
+uint16_t      schedInt    = 500;      // scheduler time interval (ms)
 uint8_t       schedCount  = 0;        // scheduler counter
-uint8_t       pwmDutyCycle = 70;      // PWM frequency (0 - 100)
+//uint8_t       pwmDutyCycle = 70;      // PWM frequency (0 - 100)
