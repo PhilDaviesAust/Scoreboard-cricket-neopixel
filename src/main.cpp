@@ -59,7 +59,8 @@ void updateTime(){
   int charOffset = 10;
   uint8_t buffsize = sizeof(bufftime); 
   uint32_t now = ((millis() - baseMillis)/1000) + baseSeconds;
-  uint8_t hours = (now/3600) % 12;
+  uint8_t hours = (now/3600) % 24;
+  if(hours != 12) hours = hours % 12;
   uint8_t minutes = (now/60) % 60;
   snprintf(bufftime, buffsize, PSTR("%2u%02u"), hours, minutes);
   updateLEDs(bufftime, buffsize, charOffset);
