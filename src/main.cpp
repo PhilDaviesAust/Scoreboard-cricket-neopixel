@@ -1,3 +1,7 @@
+/* Scoreboard Controller
+    based on ESP8266 and WS2815 LED strip
+    01-01-2022   
+*/
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
@@ -6,22 +10,6 @@
 #include <FastLED.h>
 #include "credentials.h"
 #include "varDeclaration.h"
-
-#define DATA_PIN        4
-#define RGB_ORDER       GRB
-#define CHIPSET         WS2812  // may need to be WS2813
-#define NUM_LEDS        594
-#define LEDS_IN_SEGMENT 6
-#define SEGMENTS        7
-#define BRIGHTNESS      50
-
-CRGBArray<NUM_LEDS> leds;
-const CRGB C_ON   = CRGB::Yellow;
-const CRGB C_OFF  = CRGB::Black;
-CRGB colour;
-
-AsyncWebServer server(80);
-
 ///////////////////////////////////////////////////////////////////////////////
 String getContentType(String url){
   if(url.endsWith(".htm"))       return "text/html";
@@ -44,37 +32,18 @@ String formatBytes(size_t bytes){
   else return String(bytes/1024.0)+"KB";
 } // end of formatBytes
 ///////////////////////////////////////////////////////////////////////////////
-void updateTime(){
-  int indx, ledNo, offset= 10 * SEGMENTS * LEDS_IN_SEGMENT;
-  uint32_t now = ((millis() - baseMillis)/1000) + baseSeconds;
-  uint8_t hours = (now/3600) % 12;
-  uint8_t minutes = (now/60) % 60;
-  //uint8_t seconds = now % 3600;
-  snprintf(bufftime, sizeof(bufftime), PSTR("%2u%02u"),hours, minutes);
-  for (uint8_t charNo = 0; charNo < 4; charNo++){   // cycle through characters in bufftime
-    if((indx = (int)bufftime[charNo]-48) < 0) indx = 10;
-    //Serialprintf("Character: %i\n", indx);
-    for (int segNo = 0; segNo < SEGMENTS; segNo++)  // cycle through segments in character
+void updateLEDs(char buffer[], uint8_t buffsize, int charOffset){
+  int indx, ledNo, offset = charOffset * SEGMENTS * LEDS_IN_SEGMENT;
+  Serialprintf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+  for (uint8_t charNo = 0; charNo < buffsize-1; charNo++) {  // cycle through characters in buffchar
+    if((indx = (int)buffer[charNo]-48) < 0) indx = 10;
+    Serialprintf("\nCharacter: %i\n", indx);
+    for (int segNo = 0; segNo < SEGMENTS; segNo++)                  // cycle through segments in character
     {
       colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
       ledNo = charNo * SEGMENTS * LEDS_IN_SEGMENT + segNo * LEDS_IN_SEGMENT + offset;
       leds(ledNo, ledNo+5) = colour;
-      //Serialprintf("char: %i seg: %i led: %i value: %i\n", charNo, segNo, ledNo, colour.g);
-    }
-  } 
-} // end of updateTime
-///////////////////////////////////////////////////////////////////////////////
-void updateLEDs(){
-  int indx, ledNo;
-  for (uint8_t charNo = 0; charNo < sizeof(buffchr)-1; charNo++) {    // cycle through characters in buffchar
-    if((indx = (int)buffchr[charNo]-48) < 0) indx = 10;
-    Serialprintf("Character: %i\n", indx);
-    for (int segNo = 0; segNo < SEGMENTS; segNo++)                // cycle through segments in character
-    {
-      colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
-      ledNo = charNo * SEGMENTS * LEDS_IN_SEGMENT + segNo * LEDS_IN_SEGMENT;
-      leds(ledNo, ledNo+5) = colour;
-      Serialprintf("char: %i seg: %i led: %i value: %i\n", charNo, segNo, ledNo, colour.g);
+      Serialprintf("char:%i seg:%i led:%i value:%i\n", charNo, segNo, ledNo, colour.g);
     }
   }
   //  print full led array
@@ -85,6 +54,25 @@ void updateLEDs(){
   //   Serialprintf("led[%i] %i\n", i, leds[i].g);
   // }
 } // end of updateLEDs
+///////////////////////////////////////////////////////////////////////////////
+void updateTime(){
+  int charOffset = 10;
+  uint8_t buffsize = sizeof(bufftime); 
+  uint32_t now = ((millis() - baseMillis)/1000) + baseSeconds;
+  uint8_t hours = (now/3600) % 12;
+  uint8_t minutes = (now/60) % 60;
+  snprintf(bufftime, buffsize, PSTR("%2u%02u"), hours, minutes);
+  updateLEDs(bufftime, buffsize, charOffset);
+} // end of updateTime
+///////////////////////////////////////////////////////////////////////////////
+void updateScore(AsyncWebServerRequest *request){
+  int charOffset = 0;
+  uint8_t buffsize = sizeof(buffchr);
+  snprintf (buffchr, buffsize, PSTR("%3s%3s%2s%2s"), 
+            request->arg(F("score")), request->arg(F("target")),
+            request->arg(F("overs")), request->arg(F("wicket")));
+  updateLEDs(buffchr, buffsize, charOffset);
+} // end of updateScore
 ///////////////////////////////////////////////////////////////////////////////
 void handleServeFile(AsyncWebServerRequest *request) {
   String url = request->url();
@@ -99,19 +87,13 @@ void handleServeFile(AsyncWebServerRequest *request) {
   }
 } // end of handleServeFile
 ///////////////////////////////////////////////////////////////////////////////
-void handleUpdate( AsyncWebServerRequest *request){
+void handleUpdate(AsyncWebServerRequest *request){
   String brightness = request->arg("brightness"); //TODO do something with this
   baseSeconds = (request->arg("seconds")).toInt();
   baseMillis = millis();
 
-  snprintf (buffchr, sizeof(buffchr), PSTR("%3s%3s%2s%2s"), 
-            request->arg(F("score")),
-            request->arg(F("target")),
-            request->arg(F("overs")),
-            request->arg(F("wicket")));
-  
   int start = millis();
-  updateLEDs();
+  updateScore(request);
   int finish = millis() - start;
 
   request->send(200, "text/plain",  "score:" + request->arg(F("score")) + \
@@ -129,12 +111,9 @@ void scheduler() {
   colour = (schedCount%2 == 0) ? C_ON : C_OFF;
   leds(588, 593) = colour;                  // pulse the clock :
 
-  if(schedCount == 1) {
-    updateTime();
-    Serialprintf("Time updated:%i %i\n", baseMillis, baseSeconds);
-  }
+  if(schedCount == 1) updateTime();         // update the time
 
-  FastLED.show();
+  FastLED.show();                           // update display every 500 millis
 
   schedCount = schedCount % 60;
 } // end of scheduler
