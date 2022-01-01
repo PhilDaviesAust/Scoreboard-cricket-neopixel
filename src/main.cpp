@@ -93,15 +93,16 @@ void handleUpdate(AsyncWebServerRequest *request){
   baseSeconds = (request->arg("seconds")).toInt();
   baseMillis = millis();
 
-  int start = millis();
   updateScore(request);
-  int finish = millis() - start;
 
-  request->send(200, "text/plain",  "score:" + request->arg(F("score")) + \
-                                    " overs:" + request->arg(F("overs")) + \
-                                    " wickets:" + request->arg(F("wicket")) + \
-                                    " target:" + request->arg(F("target")) + \
-                                    " updatetime:" + finish);
+  String response = "<section style='font-family:verdana;font-size:12px;'><p>Last update:<br>";
+  response += "score:" + request->arg(F("score")) +
+   " overs:" + request->arg(F("overs")) +
+   " wickets:" + request->arg(F("wicket")) +
+   " target:" + request->arg(F("target")) +
+   "</p></section>";
+
+  request->send(200, "text/html",  response);
   Serialprintln("update complete");
 } // end of handleUpdate
 ///////////////////////////////////////////////////////////////////////////////
@@ -109,10 +110,10 @@ void scheduler() {
   schedCount++;
   digitalWrite(LED_BUILTIN, schedCount%2);  // blink builtin LED 1Hz cycle
 
+  if(schedCount == 1) updateTime();         // update the time every 30 seconds
+
   colour = (schedCount%2 == 0) ? C_ON : C_OFF;
   leds(588, 593) = colour;                  // pulse the clock :
-
-  if(schedCount == 1) updateTime();         // update the time
 
   FastLED.show();                           // update display every 500 millis
 

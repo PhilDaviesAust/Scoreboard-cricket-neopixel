@@ -55,8 +55,9 @@ label {
 }
 
 iframe {
-	margin: 				12px;
+	margin: 				8px 12px;
 	height: 				48px;
+	width:					auto;
 }
 
 .slrPanel label {
