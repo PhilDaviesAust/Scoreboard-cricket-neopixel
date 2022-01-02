@@ -1,12 +1,13 @@
 
-<h2>This directory should include a credentials.h file containing the following content.</h2>
-<code>
-// assign network name (ssid) and password (password must be min 8 characters)
- const char* ssid     = "ssidname";
- const char* password = "password";
+This directory should include a "credentials.h" file containing the following content.
 
-// assign IP address
- IPAddress local_IP(10,0,0,200);
- IPAddress gateway(10,0,0,1);
- IPAddress subnet(255,255,255,0);
-</code>
+     // assign network name (ssid) and password (password must be min 8 char)
+     const char* ssid     = "ssidname";
+     const char* password = "password";
+
+    // assign IP address
+    IPAddress local_IP(10,0,0,200);
+    IPAddress gateway(10,0,0,1);
+    IPAddress subnet(255,255,255,0);
+
+Adjust the ssid and password to suit your site.
