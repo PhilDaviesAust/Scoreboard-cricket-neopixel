@@ -1,6 +1,6 @@
 
 This directory should include a credentials.h file containing the following content.
-
+<code>
 // assign network name (ssid) and password (password must be min 8 characters)
  const char* ssid     = "ssidname";
  const char* password = "password";
@@ -9,4 +9,4 @@ This directory should include a credentials.h file containing the following cont
  IPAddress local_IP(10,0,0,200);
  IPAddress gateway(10,0,0,1);
  IPAddress subnet(255,255,255,0);
-
+</code>
