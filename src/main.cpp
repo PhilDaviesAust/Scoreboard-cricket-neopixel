@@ -34,7 +34,7 @@ String formatBytes(size_t bytes){
 ///////////////////////////////////////////////////////////////////////////////
 void updateLEDs(char buffer[], uint8_t buffsize, int charOffset){
   int indx, ledNo, offset = charOffset * SEGMENTS * LEDS_IN_SEGMENT;
-  Serialprintf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+  Serialprintf("\nxxxxxxxxxxxxxxx");
   for (uint8_t charNo = 0; charNo < buffsize-1; charNo++) {  // cycle through characters in buffchar
     if((indx = (int)buffer[charNo]-48) < 0) indx = 10;
     Serialprintf("\nCharacter: %i\n", indx);
@@ -43,7 +43,7 @@ void updateLEDs(char buffer[], uint8_t buffsize, int charOffset){
       colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
       ledNo = charNo * SEGMENTS * LEDS_IN_SEGMENT + segNo * LEDS_IN_SEGMENT + offset;
       leds(ledNo, ledNo+5) = colour;
-      Serialprintf("char:%i seg:%i led:%i value:%i\n", charNo, segNo, ledNo, colour.g);
+      //Serialprintf("char:%i seg:%i led:%i value:%i\n", charNo, segNo, ledNo, colour.g);
     }
   }
   //  print full led array
@@ -95,8 +95,7 @@ void handleUpdate(AsyncWebServerRequest *request){
 
   updateScore(request);
 
-  String response = "<section style='font-family:verdana;font-size:12px;'><p>Last update:<br>";
-  response += "score:" + request->arg(F("score")) +
+  String response = style + "score:" + request->arg(F("score")) +
    " overs:" + request->arg(F("overs")) +
    " wickets:" + request->arg(F("wicket")) +
    " target:" + request->arg(F("target")) +
@@ -144,6 +143,12 @@ void setup() {
   }
 //-------------------------------------------------------------
   // Start WiFi
+  // WiFi.mode(WIFI_AP);
+  // WiFi.softAPConfig(local_IP, gateway, subnet);
+  // bool apConnected = WiFi.softAP(ssid, password);
+  // if (apConnected) {
+  //     Serialprintf("WiFi IP: %s\n", WiFi.softAPIP().toString().c_str());
+  // }
   WiFi.mode(WIFI_STA);            //TODO change to AP mode
   WiFi.begin(ssid, password);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {

@@ -51,4 +51,4 @@ uint32_t      baseSeconds = 0;        // time stamp in seconds
 uint32_t      baseMillis  = 0;        // time stamp in millis
 uint16_t      schedInt    = 500;      // scheduler time interval (ms)
 uint8_t       schedCount  = 0;        // scheduler counter
-
+const String  style = "<section style='font-family:verdana;font-size:12px;'><p>Last update:<br>";
