@@ -1,5 +1,5 @@
 
-This directory should include a credentials.h file containing the following content.
+<h2>This directory should include a credentials.h file containing the following content.</h2>
 <code>
 // assign network name (ssid) and password (password must be min 8 characters)
  const char* ssid     = "ssidname";
