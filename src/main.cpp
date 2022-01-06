@@ -35,18 +35,24 @@ String formatBytes(size_t bytes){
 void updateLEDs(char buffer[], uint8_t buffsize, int charOffset){
   int indx, ledNo, offset = charOffset * SEGMENTS * LEDS_IN_SEGMENT;
   Serialprintf("\nxxxxxxxxxxxxxxx");
-  for (uint8_t charNo = 0; charNo < buffsize-1; charNo++) {  // cycle through characters in buffchar
-    if((indx = (int)buffer[charNo]-48) < 0) indx = 10;
-    Serialprintf("\nCharacter: %i\n", indx);
-    for (int segNo = 0; segNo < SEGMENTS; segNo++)                  // cycle through segments in character
+  for (uint8_t charNo = 0; charNo < sizeof(buffchr)-1; charNo++) {  // cycle through characters in buffchar
+    if((indx = buffchr[charNo]-48) < 0) indx = 10;
+    //Serialprintf("\nCharacter: %i\n", indx);
+    for (int segNo = 0; segNo < SEGMENTS; segNo++)           // cycle through segments in character
     {
       colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
-      ledNo = charNo * SEGMENTS * LEDS_IN_SEGMENT + segNo * LEDS_IN_SEGMENT + offset;
+      ledNo = led_mapping[charNo] + segNo * LEDS_IN_SEGMENT;
       leds(ledNo, ledNo+5) = colour;
       //Serialprintf("char:%i seg:%i led:%i value:%i\n", charNo, segNo, ledNo, colour.g);
     }
   }
-  //  print full led array
+  
+  Serialprintf("\n");
+ for (uint16_t i = 0; i < buffsize-1; i++)
+  {
+    Serialprintf("buffer[%i]: %c\n", i, buffer[i]);
+  }
+ //  print full led array
   // for (int i = 0; i < NUM_LEDS; i++)
   // {
   //   if(i%42 == 0) Serialprintf("\ncharacter %i\n", i/42);
@@ -59,19 +65,26 @@ void updateTime(){
   int charOffset = 10;
   uint8_t buffsize = sizeof(bufftime); 
   uint32_t now = ((millis() - baseMillis)/1000) + baseSeconds;
-  uint8_t hours = (now/3600) % 24;
+  hours = (now/3600) % 24;
   if(hours != 12) hours = hours % 12;
-  uint8_t minutes = (now/60) % 60;
-  snprintf(bufftime, buffsize, PSTR("%2u%02u"), hours, minutes);
+  minutes = (now/60) % 60;
+  buffchr[11] = (hours < 10) ? ' ': (hours - hours%10) + 48;
+  buffchr[12] = hours%10 + 48;
+  buffchr[13] = (minutes - minutes%10) + 48;
+  buffchr[14] = minutes%10 + 48;
+
+  snprintf(bufftime, buffsize, PSTR("%2u%02u"), hours, minutes);  //TODO redundant - values moved to buffchar[]
+
   updateLEDs(bufftime, buffsize, charOffset);
 } // end of updateTime
 ///////////////////////////////////////////////////////////////////////////////
 void updateScore(AsyncWebServerRequest *request){
   int charOffset = 0;
   uint8_t buffsize = sizeof(buffchr);
-  snprintf (buffchr, buffsize, PSTR("%3s%3s%2s%2s"), 
+  snprintf (buffchr, buffsize, PSTR("%3s%3s%2s%2s%2u%02u"), 
             request->arg(F("score")), request->arg(F("target")),
-            request->arg(F("overs")), request->arg(F("wicket")));
+            request->arg(F("overs")), request->arg(F("wicket")),
+            hours, minutes);
   updateLEDs(buffchr, buffsize, charOffset);
 } // end of updateScore
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,6 +105,8 @@ void handleUpdate(AsyncWebServerRequest *request){
   String brightness = request->arg("brightness"); //TODO do something with this
   baseSeconds = (request->arg("seconds")).toInt();
   baseMillis = millis();
+  String score = request->arg("score");
+  Serialprintf("\nscore=%s",score);
 
   updateScore(request);
 

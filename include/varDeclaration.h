@@ -14,7 +14,7 @@
 #define DATA_PIN        4
 #define RGB_ORDER       GRB
 #define CHIPSET         WS2812  // may need to be WS2813
-#define NUM_LEDS        594
+#define NUM_LEDS        594     // 14 characters * 7 segments * 6 LEDs + 6 LEDs(colon)
 #define LEDS_IN_SEGMENT 6
 #define SEGMENTS        7
 #define BRIGHTNESS      50
@@ -44,11 +44,29 @@ const uint8_t seg_mapping[16][7] = {
   {1,1,0,0,0,1,1,},     // F
   {1,1,1,0,0,0,1,}      // degree
 };
+const uint16_t led_mapping[14] = {
+  0,    // score
+  42,   // 
+  84,   //
+  126,  // target
+  168,  //
+  210,  //
+  252,  // overs
+  294,  //
+  336,  // wicket
+  378,  //
+  420,  // hours
+  462,  //
+  504,  // minutes
+  546   //
+};
 
-char          buffchr[11];            // character buffer for character display
+char          buffchr[15];            // character buffer for character display
 char          bufftime[5];            // character buffer for time display
 uint32_t      baseSeconds = 0;        // time stamp in seconds
 uint32_t      baseMillis  = 0;        // time stamp in millis
+uint8_t       hours       = 0;        // display time hours
+uint8_t       minutes     = 0;        // display time minutes
 uint16_t      schedInt    = 500;      // scheduler time interval (ms)
 uint8_t       schedCount  = 0;        // scheduler counter
 const String  style = "<section style='font-family:verdana;font-size:12px;'><p>Last update:<br>";
