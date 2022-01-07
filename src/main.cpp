@@ -32,60 +32,49 @@ String formatBytes(size_t bytes){
   else return String(bytes/1024.0)+"KB";
 } // end of formatBytes
 ///////////////////////////////////////////////////////////////////////////////
-void updateLEDs(char buffer[], uint8_t buffsize, int charOffset){
-  int indx, ledNo, offset = charOffset * SEGMENTS * LEDS_IN_SEGMENT;
+void updateLEDs(){
+  int indx, ledNo;
   Serialprintf("\nxxxxxxxxxxxxxxx");
   for (uint8_t charNo = 0; charNo < sizeof(buffchr)-1; charNo++) {  // cycle through characters in buffchar
-    if((indx = buffchr[charNo]-48) < 0) indx = 10;
+    if((indx = buffchr[charNo]-48) < 0) indx = 10;           // convert ascii to decimal, adjust space character
     //Serialprintf("\nCharacter: %i\n", indx);
     for (int segNo = 0; segNo < SEGMENTS; segNo++)           // cycle through segments in character
     {
       colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
-      ledNo = led_mapping[charNo] + segNo * LEDS_IN_SEGMENT;
+      ledNo = led_mapping[charNo] + (segNo * LEDS_IN_SEGMENT);
       leds(ledNo, ledNo+5) = colour;
       //Serialprintf("char:%i seg:%i led:%i value:%i\n", charNo, segNo, ledNo, colour.g);
     }
   }
-  
-  Serialprintf("\n");
- for (uint16_t i = 0; i < buffsize-1; i++)
-  {
-    Serialprintf("buffer[%i]: %c\n", i, buffer[i]);
-  }
  //  print full led array
-  // for (int i = 0; i < NUM_LEDS; i++)
-  // {
-  //   if(i%42 == 0) Serialprintf("\ncharacter %i\n", i/42);
-  //   if(i%6 == 0) Serialprintln(i);
-  //   Serialprintf("led[%i] %i\n", i, leds[i].g);
+  // Serialprintf("\n");
+  // for (int i = 0; i < NUM_LEDS; i++) {
+  //   if(i%42 == 0) Serialprintf("\n\ncharacter %i = '%c'\n", i/42, buffchr[i/42]);
+  //   if(i%6 == 0) Serialprintf("\n");
+  //   Serialprintf("led[%i] %3i\t", i, leds[i].g);
   // }
 } // end of updateLEDs
 ///////////////////////////////////////////////////////////////////////////////
-void updateTime(){
-  int charOffset = 10;
-  uint8_t buffsize = sizeof(bufftime); 
+void updateTime() {
+  //uint8_t buffsize = sizeof(bufftime); 
   uint32_t now = ((millis() - baseMillis)/1000) + baseSeconds;
   hours = (now/3600) % 24;
   if(hours != 12) hours = hours % 12;
   minutes = (now/60) % 60;
-  buffchr[11] = (hours < 10) ? ' ': (hours - hours%10) + 48;
-  buffchr[12] = hours%10 + 48;
-  buffchr[13] = (minutes - minutes%10) + 48;
-  buffchr[14] = minutes%10 + 48;
-
-  snprintf(bufftime, buffsize, PSTR("%2u%02u"), hours, minutes);  //TODO redundant - values moved to buffchar[]
-
-  updateLEDs(bufftime, buffsize, charOffset);
+  buffchr[10] = (hours < 10) ? ' ': hours/10 + 48;
+  buffchr[11] = hours%10 + 48;
+  buffchr[12] = minutes/10 + 48;
+  buffchr[13] = minutes%10 + 48;
+  updateLEDs();
 } // end of updateTime
 ///////////////////////////////////////////////////////////////////////////////
-void updateScore(AsyncWebServerRequest *request){
-  int charOffset = 0;
+void updateScore(AsyncWebServerRequest *request) {
   uint8_t buffsize = sizeof(buffchr);
   snprintf (buffchr, buffsize, PSTR("%3s%3s%2s%2s%2u%02u"), 
             request->arg(F("score")), request->arg(F("target")),
             request->arg(F("overs")), request->arg(F("wicket")),
             hours, minutes);
-  updateLEDs(buffchr, buffsize, charOffset);
+  updateLEDs();
 } // end of updateScore
 ///////////////////////////////////////////////////////////////////////////////
 void handleServeFile(AsyncWebServerRequest *request) {
@@ -101,21 +90,16 @@ void handleServeFile(AsyncWebServerRequest *request) {
   }
 } // end of handleServeFile
 ///////////////////////////////////////////////////////////////////////////////
-void handleUpdate(AsyncWebServerRequest *request){
+void handleUpdate(AsyncWebServerRequest *request) {
   String brightness = request->arg("brightness"); //TODO do something with this
   baseSeconds = (request->arg("seconds")).toInt();
   baseMillis = millis();
-  String score = request->arg("score");
-  Serialprintf("\nscore=%s",score);
-
   updateScore(request);
-
-  String response = style + "score:" + request->arg(F("score")) +
-   " overs:" + request->arg(F("overs")) +
-   " wickets:" + request->arg(F("wicket")) +
-   " target:" + request->arg(F("target")) +
+  String response = style + "score:" + request->arg("score") +
+   " overs:" + request->arg("overs") +
+   " wickets:" + request->arg("wicket") +
+   " target:" + request->arg("target") +
    "</p></section>";
-
   request->send(200, "text/html",  response);
   Serialprintln("update complete");
 } // end of handleUpdate
@@ -127,7 +111,7 @@ void scheduler() {
   if(schedCount == 1) updateTime();         // update the time every 30 seconds
 
   colour = (schedCount%2 == 0) ? C_ON : C_OFF;
-  leds(588, 593) = colour;                  // pulse the clock :
+  leds(pulse, pulse+5) = colour;            // pulse the clock :
 
   FastLED.show();                           // update display every 500 millis
 
@@ -146,7 +130,7 @@ void setup() {
 //-------------------------------------------------------------
   // start LittleFS file system
   LittleFS.begin();               
-  delay(1000);
+  delay(200);
   {
     Dir dir = LittleFS.openDir(F("/"));
     Serialprintln("\nFile System:");

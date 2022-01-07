@@ -25,7 +25,7 @@ const CRGB              C_OFF  = CRGB::Black;
 CRGB                    colour;
 AsyncWebServer          server(80);
 
-const uint8_t seg_mapping[16][7] = {
+const uint8_t  seg_mapping[16][7] = {
 // F A B C D E G   
   {1,1,1,1,1,1,0,},     // Digit 0
   {0,0,1,1,0,0,0,},     // Digit 1
@@ -45,28 +45,27 @@ const uint8_t seg_mapping[16][7] = {
   {1,1,1,0,0,0,1,}      // degree
 };
 const uint16_t led_mapping[14] = {
-  0,    // score
-  42,   // 
-  84,   //
-  126,  // target
-  168,  //
-  210,  //
-  252,  // overs
-  294,  //
-  336,  // wicket
-  378,  //
-  420,  // hours
-  462,  //
-  504,  // minutes
-  546   //
+  0,    // 0 score
+  42,   // 1
+  84,   // 2
+  126,  // 3 target
+  168,  // 4
+  210,  // 5
+  252,  // 6 overs
+  294,  // 7
+  336,  // 8 wicket
+  378,  // 9
+  420,  // 10 hours
+  462,  // 11
+  504,  // 12 minutes
+  546   // 13
 };
-
-char          buffchr[15];            // character buffer for character display
-char          bufftime[5];            // character buffer for time display
-uint32_t      baseSeconds = 0;        // time stamp in seconds
-uint32_t      baseMillis  = 0;        // time stamp in millis
-uint8_t       hours       = 0;        // display time hours
-uint8_t       minutes     = 0;        // display time minutes
-uint16_t      schedInt    = 500;      // scheduler time interval (ms)
-uint8_t       schedCount  = 0;        // scheduler counter
-const String  style = "<section style='font-family:verdana;font-size:12px;'><p>Last update:<br>";
+const uint16_t pulse       = 588;      // clock pulse starting LED number
+uint32_t       baseSeconds = 0;        // time stamp in seconds
+uint32_t       baseMillis  = 0;        // time stamp in millis
+uint8_t        hours       = 0;        // display time hours
+uint8_t        minutes     = 0;        // display time minutes
+uint16_t       schedInt    = 500;      // scheduler time interval (ms)
+uint8_t        schedCount  = 0;        // scheduler counter
+char           buffchr[15];            // character buffer for character display
+static const String style = "<section style='font-family:verdana;font-size:12px;'><p>Last update:<br>";
