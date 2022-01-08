@@ -33,17 +33,18 @@ String formatBytes(size_t bytes){
 } // end of formatBytes
 ///////////////////////////////////////////////////////////////////////////////
 void updateLEDs(){
-  int indx, ledNo;
+  int16_t indx, ledNo; 
   Serialprintf("\nxxxxxxxxxxxxxxx");
+  FastLED.setBrightness(brightness);
   for (uint8_t charNo = 0; charNo < sizeof(buffchr)-1; charNo++) {  // cycle through characters in buffchar
-    if((indx = buffchr[charNo]-48) < 0) indx = 10;           // convert ascii to decimal, adjust space character
-    //Serialprintf("\nCharacter: %i\n", indx);
-    for (int segNo = 0; segNo < SEGMENTS; segNo++)           // cycle through segments in character
+    if((indx = buffchr[charNo]-48) < 0) indx = 10;               // ascii to decimal, adjust space character
+    Serialprintf("\n\nChar No: %i Character: %i\n", charNo, indx);
+    for (uint8_t segNo = 0; segNo < SEGMENTS; segNo++)           // cycle through segments in character
     {
       colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
       ledNo = led_mapping[charNo] + (segNo * LEDS_IN_SEGMENT);
       leds(ledNo, ledNo+5) = colour;
-      //Serialprintf("char:%i seg:%i led:%i value:%i\n", charNo, segNo, ledNo, colour.g);
+      Serialprintf("seg:%i led:%3i val:%3i\t", segNo, ledNo, colour.g);
     }
   }
  //  print full led array
@@ -91,17 +92,18 @@ void handleServeFile(AsyncWebServerRequest *request) {
 } // end of handleServeFile
 ///////////////////////////////////////////////////////////////////////////////
 void handleUpdate(AsyncWebServerRequest *request) {
-  String brightness = request->arg("brightness"); //TODO do something with this
+  brightness = map(request->arg("brightness").toInt(), 0, 10, 0, 255);
   baseSeconds = (request->arg("seconds")).toInt();
   baseMillis = millis();
   updateScore(request);
-  String response = style + "score:" + request->arg("score") +
+  String response = style + 
+    "score:" + request->arg("score") +
    " overs:" + request->arg("overs") +
    " wickets:" + request->arg("wicket") +
    " target:" + request->arg("target") +
    "</p></section>";
   request->send(200, "text/html",  response);
-  Serialprintln("update complete");
+  Serialprintf("\nupdate complete\n");
 } // end of handleUpdate
 ///////////////////////////////////////////////////////////////////////////////
 void scheduler() {
@@ -123,7 +125,7 @@ void setup() {
 //-------------------------------------------------------------
   // fastLED initialisation
   FastLED.addLeds<CHIPSET, DATA_PIN, RGB_ORDER>(leds, NUM_LEDS);
-  FastLED.setBrightness( BRIGHTNESS );
+  FastLED.setBrightness(brightness);
   FastLED.clear();
   FastLED.show();
   pinMode(LED_BUILTIN, OUTPUT);

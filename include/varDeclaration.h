@@ -17,7 +17,6 @@
 #define NUM_LEDS        594     // 14 characters * 7 segments * 6 LEDs + 6 LEDs(colon)
 #define LEDS_IN_SEGMENT 6
 #define SEGMENTS        7
-#define BRIGHTNESS      50
 
 CRGBArray<NUM_LEDS>     leds;
 const CRGB              C_ON   = CRGB::Yellow;
@@ -65,6 +64,7 @@ uint32_t       baseSeconds = 0;        // time stamp in seconds
 uint32_t       baseMillis  = 0;        // time stamp in millis
 uint8_t        hours       = 0;        // display time hours
 uint8_t        minutes     = 0;        // display time minutes
+uint8_t        brightness  = 64;       // display brightness level
 uint16_t       schedInt    = 500;      // scheduler time interval (ms)
 uint8_t        schedCount  = 0;        // scheduler counter
 char           buffchr[15];            // character buffer for character display
