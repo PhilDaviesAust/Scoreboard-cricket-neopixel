@@ -14,9 +14,10 @@
 #define DATA_PIN        4
 #define RGB_ORDER       GRB
 #define CHIPSET         WS2812  // may need to be WS2813
-#define NUM_LEDS        594     // 14 characters * 7 segments * 6 LEDs + 6 LEDs(colon)
-#define LEDS_IN_SEGMENT 6
 #define SEGMENTS        7
+#define LEDS_IN_SEGMENT 6
+#define NUM_LEDS        594     // 14 characters * 7 segments * 6 LEDs + 6 LEDs(colon)
+#define PULSE           588     // clock pulse starting LED number
 
 CRGBArray<NUM_LEDS>     leds;
 const CRGB              C_ON   = CRGB::Yellow;
@@ -59,7 +60,6 @@ const uint16_t led_mapping[14] = {
   504,  // 12 minutes
   546   // 13
 };
-const uint16_t pulse       = 588;      // clock pulse starting LED number
 uint32_t       baseSeconds = 0;        // time stamp in seconds
 uint32_t       baseMillis  = 0;        // time stamp in millis
 uint8_t        hours       = 0;        // display time hours

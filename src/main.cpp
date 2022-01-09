@@ -57,7 +57,6 @@ void updateLEDs(){
 } // end of updateLEDs
 ///////////////////////////////////////////////////////////////////////////////
 void updateTime() {
-  //uint8_t buffsize = sizeof(bufftime); 
   uint32_t now = ((millis() - baseMillis)/1000) + baseSeconds;
   hours = (now/3600) % 24;
   if(hours != 12) hours = hours % 12;
@@ -70,8 +69,7 @@ void updateTime() {
 } // end of updateTime
 ///////////////////////////////////////////////////////////////////////////////
 void updateScore(AsyncWebServerRequest *request) {
-  uint8_t buffsize = sizeof(buffchr);
-  snprintf (buffchr, buffsize, PSTR("%3s%3s%2s%2s%2u%02u"), 
+  snprintf (buffchr, sizeof(buffchr), PSTR("%3s%3s%2s%2s%2u%02u"), 
             request->arg(F("score")), request->arg(F("target")),
             request->arg(F("overs")), request->arg(F("wicket")),
             hours, minutes);
@@ -96,7 +94,7 @@ void handleUpdate(AsyncWebServerRequest *request) {
   baseSeconds = (request->arg("seconds")).toInt();
   baseMillis = millis();
   updateScore(request);
-  String response = style + 
+  String response = style +
     "score:" + request->arg("score") +
    " overs:" + request->arg("overs") +
    " wickets:" + request->arg("wicket") +
@@ -113,11 +111,11 @@ void scheduler() {
   if(schedCount == 1) updateTime();         // update the time every 30 seconds
 
   colour = (schedCount%2 == 0) ? C_ON : C_OFF;
-  leds(pulse, pulse+5) = colour;            // pulse the clock :
+  leds(PULSE, PULSE+5) = colour;            // pulse the clock :
 
   FastLED.show();                           // update display every 500 millis
 
-  schedCount = schedCount % 60;
+  schedCount %= 60;
 } // end of scheduler
 ///////////////////////////////////////////////////////////////////////////////
 void setup() {
