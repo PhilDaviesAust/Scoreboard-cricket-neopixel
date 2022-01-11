@@ -60,6 +60,11 @@ const uint16_t led_mapping[14] = {
   504,  // 12 minutes
   546   // 13
 };
+
+// Buffchr[15]	   S1	S2	S3	T1	T2	T3	O1	O2	W1	W2	H1	H2	M1	M2	\0
+// led_mapping[14]	0	42	84	126	168	210	252	294	336	378	420	462	504	546	
+// PULSE           588
+
 uint32_t       baseSeconds = 0;        // time stamp in seconds
 uint32_t       baseMillis  = 0;        // time stamp in millis
 uint8_t        hours       = 0;        // display time hours
