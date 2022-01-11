@@ -11,7 +11,7 @@
 #include "credentials.h"
 #include "varDeclaration.h"
 ///////////////////////////////////////////////////////////////////////////////
-String getContentType(String url){
+String getContentType(String url) {
   if(url.endsWith(".htm"))       return "text/html";
   else if(url.endsWith(".html")) return "text/html";
   else if(url.endsWith(".css"))  return "text/css";
@@ -27,24 +27,26 @@ String getContentType(String url){
   return "text/plain";
 } // end of getContentType
 ///////////////////////////////////////////////////////////////////////////////
-String formatBytes(size_t bytes){
+String formatBytes(size_t bytes) {
   if (bytes < 1024) return String(bytes)+"B";
   else return String(bytes/1024.0)+"KB";
 } // end of formatBytes
 ///////////////////////////////////////////////////////////////////////////////
-void updateLEDs(){
+void updateLEDs() {
   int16_t indx, ledNo; 
-  Serialprintf("\nxxxxxxxxxxxxxxx");
+  Serialprintf("\nxxxxxxxxxxxxxxx\n");
+  //Serialprintf("Free heap:%i bytes in updateLEDs\tfragmentation:%i%%\n", ESP.getFreeHeap(), ESP.getHeapFragmentation());
+
   FastLED.setBrightness(brightness);
   for (uint8_t charNo = 0; charNo < sizeof(buffchr)-1; charNo++) {  // cycle through characters in buffchar
-    if((indx = buffchr[charNo]-48) < 0) indx = 10;               // ascii to decimal, adjust space character
-    Serialprintf("\n\nChar No: %i Character: %i\n", charNo, indx);
-    for (uint8_t segNo = 0; segNo < SEGMENTS; segNo++)           // cycle through segments in character
+    if((indx = buffchr[charNo]-48) < 0) indx = 10;                  // ascii to decimal, adjust space character
+    //Serialprintf("\n\nChar No: %i Character: %i\n", charNo, indx);
+    for (uint8_t segNo = 0; segNo < SEGMENTS; segNo++)              // cycle through segments in character
     {
       colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
       ledNo = led_mapping[charNo] + (segNo * LEDS_IN_SEGMENT);
       leds(ledNo, ledNo+5) = colour;
-      Serialprintf("seg:%i led:%3i val:%3i\t", segNo, ledNo, colour.g);
+      //Serialprintf("seg:%i led:%3i val:%3i\t", segNo, ledNo, colour.g);
     }
   }
  //  print full led array
@@ -110,12 +112,11 @@ void scheduler() {
 
   if(schedCount == 1) updateTime();         // update the time every 30 seconds
 
-  colour = (schedCount%2 == 0) ? C_ON : C_OFF;
-  leds(PULSE, PULSE+5) = colour;            // pulse the clock :
+  leds(PULSE, PULSE+5) = (schedCount%2 == 0) ? C_ON: C_OFF;  // pulse the clock :
 
   FastLED.show();                           // update display every 500 millis
 
-  schedCount %= 60;
+  schedCount %= 60;                         // cycle every 30 seconds
 } // end of scheduler
 ///////////////////////////////////////////////////////////////////////////////
 void setup() {

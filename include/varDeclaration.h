@@ -26,7 +26,7 @@ CRGB                    colour;
 AsyncWebServer          server(80);
 
 const uint8_t  seg_mapping[16][7] = {
-// F A B C D E G   
+// F A B C D E G        // Segments
   {1,1,1,1,1,1,0,},     // Digit 0
   {0,0,1,1,0,0,0,},     // Digit 1
   {0,1,1,0,1,1,1,},     // Digit 2
@@ -38,29 +38,30 @@ const uint8_t  seg_mapping[16][7] = {
   {1,1,1,1,1,1,1,},     // Digit 8
   {1,1,1,1,1,0,1,},     // Digit 9
   {0,0,0,0,0,0,0,},     // blank
-  {0,0,0,0,0,0,1,},     // hyphen
+  {0,0,0,0,0,0,1,},     // - hyphen
   {1,1,1,1,0,1,1,},     // A
   {1,1,0,0,1,1,0,},     // C
   {1,1,0,0,0,1,1,},     // F
-  {1,1,1,0,0,0,1,}      // degree
+  {1,1,1,0,0,0,1,}      // ° degree
 };
 const uint16_t led_mapping[14] = {
-  0,    // 0 score
-  42,   // 1
-  84,   // 2
-  126,  // 3 target
-  168,  // 4
-  210,  // 5
-  252,  // 6 overs
-  294,  // 7
-  336,  // 8 wicket
-  378,  // 9
-  420,  // 10 hours
-  462,  // 11
-  504,  // 12 minutes
-  546   // 13
+  0,    // 0 score * 100
+  42,   // 1 score * 10
+  84,   // 2 score * 1
+  126,  // 3 target * 100
+  168,  // 4 target * 10
+  210,  // 5 target * 1
+  252,  // 6 overs * 10
+  294,  // 7 overs * 1
+  336,  // 8 wicket * 10
+  378,  // 9 wicket * 1
+  420,  // 10 hours * 10
+  462,  // 11 hours * 1
+  504,  // 12 minutes * 10
+  546   // 13 minutes * 1
 };
 
+//                 score      target      overs   wicket  hours   minutes
 // Buffchr[15]	   S1	S2	S3	T1	T2	T3	O1	O2	W1	W2	H1	H2	M1	M2	\0
 // led_mapping[14]	0	42	84	126	168	210	252	294	336	378	420	462	504	546	
 // PULSE           588
