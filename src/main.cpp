@@ -43,10 +43,9 @@ void updateLEDs() {
     //Serialprintf("\n\nChar No: %i Character: %i\n", charNo, indx);
     for (uint8_t segNo = 0; segNo < SEGMENTS; segNo++)              // cycle through segments in character
     {
-      colour = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
       ledNo = led_mapping[charNo] + (segNo * LEDS_IN_SEGMENT);
-      leds(ledNo, ledNo+5) = colour;
-      //Serialprintf("seg:%i led:%3i val:%3i\t", segNo, ledNo, colour.g);
+      leds(ledNo, ledNo + LEDS_IN_SEGMENT - 1) = (seg_mapping[indx][segNo]) ? C_ON : C_OFF;
+      //Serialprintf("seg:%i led:%3i val:%3i\t", segNo, ledNo, leds[ledNo].g);
     }
   }
  //  print full led array
@@ -70,14 +69,6 @@ void updateTime() {
   updateLEDs();
 } // end of updateTime
 ///////////////////////////////////////////////////////////////////////////////
-void updateScore(AsyncWebServerRequest *request) {
-  snprintf (buffchr, sizeof(buffchr), PSTR("%3s%3s%2s%2s%2u%02u"), 
-            request->arg(F("score")), request->arg(F("target")),
-            request->arg(F("overs")), request->arg(F("wicket")),
-            hours, minutes);
-  updateLEDs();
-} // end of updateScore
-///////////////////////////////////////////////////////////////////////////////
 void handleServeFile(AsyncWebServerRequest *request) {
   String url = request->url();
   if(url == "/") url = "/scoreboard.html";          // default page
@@ -92,16 +83,19 @@ void handleServeFile(AsyncWebServerRequest *request) {
 } // end of handleServeFile
 ///////////////////////////////////////////////////////////////////////////////
 void handleUpdate(AsyncWebServerRequest *request) {
-  brightness = map(request->arg("brightness").toInt(), 0, 10, 0, 255);
+  baseMillis  = millis();
   baseSeconds = (request->arg("seconds")).toInt();
-  baseMillis = millis();
-  updateScore(request);
+  brightness  = map(request->arg("brightness").toInt(), 0, 10, 0, 255);
+  snprintf (buffchr, sizeof(buffchr), PSTR("%3s%3s%2s%2s%2u%02u"), 
+            request->arg(F("score")), request->arg(F("target")),
+            request->arg(F("overs")), request->arg(F("wicket")),
+            hours, minutes);
+  updateLEDs();
+  
   String response = style +
-    "score:" + request->arg("score") +
-   " overs:" + request->arg("overs") +
-   " wickets:" + request->arg("wicket") +
-   " target:" + request->arg("target") +
-   "</p></section>";
+    "score:"    + request->arg("score")  + " overs:"  + request->arg("overs") +
+    " wickets:" + request->arg("wicket") + " target:" + request->arg("target") +
+    "</p></section>";
   request->send(200, "text/html",  response);
   Serialprintf("\nupdate complete\n");
 } // end of handleUpdate

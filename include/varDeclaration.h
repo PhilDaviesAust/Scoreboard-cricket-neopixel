@@ -22,7 +22,6 @@
 CRGBArray<NUM_LEDS>     leds;
 const CRGB              C_ON   = CRGB::Yellow;
 const CRGB              C_OFF  = CRGB::Black;
-CRGB                    colour;
 AsyncWebServer          server(80);
 
 const uint8_t  seg_mapping[16][7] = {
