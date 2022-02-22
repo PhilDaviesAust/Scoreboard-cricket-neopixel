@@ -11,16 +11,19 @@
   #define Serialbegin(baud)
 #endif
 
-#define DATA_PIN        4
-#define RGB_ORDER       GRB
-#define CHIPSET         WS2812  // may need to be WS2813
+#define DATA_PIN        D4
+#define RGB_ORDER       RGB
+#define CHIPSET         WS2812  // best match for WS2815
 #define SEGMENTS        7
 #define LEDS_IN_SEGMENT 6
 #define NUM_LEDS        594     // 14 characters * 7 segments * 6 LEDs + 6 LEDs(colon)
 #define PULSE           588     // clock pulse starting LED number
+#define PULSE_WIDTH     5       // number of LEDs in pulse
+#define CHANNEL         1
+#define ASCII_ZERO      48
 
 CRGBArray<NUM_LEDS>     leds;
-const CRGB              C_ON   = CRGB::Yellow;
+const CRGB              C_ON   = CRGB::Green;
 const CRGB              C_OFF  = CRGB::Black;
 AsyncWebServer          server(80);
 
@@ -65,11 +68,12 @@ const uint16_t led_mapping[14] = {
 // led_mapping[14]	0	42	84	126	168	210	252	294	336	378	420	462	504	546	
 // PULSE           588
 
+bool           masterNode;
 uint32_t       baseSeconds = 0;        // time stamp in seconds
 uint32_t       baseMillis  = 0;        // time stamp in millis
 uint8_t        hours       = 0;        // display time hours
 uint8_t        minutes     = 0;        // display time minutes
-uint8_t        brightness  = 64;       // display brightness level
+uint8_t        brightness  = 128;      // display brightness level
 uint16_t       schedInt    = 500;      // scheduler time interval (ms)
 uint8_t        schedCount  = 0;        // scheduler counter
 char           buffchr[15];            // character buffer for character display

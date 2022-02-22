@@ -2,6 +2,8 @@
     based on ESP8266 and WS2815 LED strip
     01-01-2022   
 */
+#define FASTLED_INTERRUPT_RETRY_COUNT 1
+
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
@@ -39,7 +41,7 @@ void updateLEDs() {
 
   FastLED.setBrightness(brightness);
   for (uint8_t charNo = 0; charNo < sizeof(buffchr)-1; charNo++) {  // cycle through characters in buffchar
-    if((indx = buffchr[charNo]-48) < 0) indx = 10;                  // ascii to decimal, adjust space character
+    if((indx = buffchr[charNo] - ASCII_ZERO) < 0) indx = 10;        // ascii to decimal, adjust space character
     //Serialprintf("\n\nChar No: %i Character: %i\n", charNo, indx);
     for (uint8_t segNo = 0; segNo < SEGMENTS; segNo++)              // cycle through segments in character
     {
@@ -62,10 +64,10 @@ void updateTime() {
   hours = (now/3600) % 24;
   if(hours != 12) hours = hours % 12;
   minutes = (now/60) % 60;
-  buffchr[10] = (hours < 10) ? ' ': hours/10 + 48;
-  buffchr[11] = hours%10 + 48;
-  buffchr[12] = minutes/10 + 48;
-  buffchr[13] = minutes%10 + 48;
+  buffchr[10] = (hours < 10) ? ' ': hours/10 + ASCII_ZERO;
+  buffchr[11] = hours%10 + ASCII_ZERO;
+  buffchr[12] = minutes/10 + ASCII_ZERO;
+  buffchr[13] = minutes%10 + ASCII_ZERO;
   updateLEDs();
 } // end of updateTime
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,13 +104,14 @@ void handleUpdate(AsyncWebServerRequest *request) {
 ///////////////////////////////////////////////////////////////////////////////
 void scheduler() {
   schedCount++;
-  digitalWrite(LED_BUILTIN, schedCount%2);  // blink builtin LED 1Hz cycle
 
   if(schedCount == 1) updateTime();         // update the time every 30 seconds
 
-  leds(PULSE, PULSE+5) = (schedCount%2 == 0) ? C_ON: C_OFF;  // pulse the clock :
+  leds(PULSE, PULSE+PULSE_WIDTH) = (schedCount%2 == 0) ? C_ON: C_OFF;  // pulse the clock :
 
   FastLED.show();                           // update display every 500 millis
+  FastLED.delay(2);
+  Serialprintf("Frames:%i\n", FastLED.getFPS());
 
   schedCount %= 60;                         // cycle every 30 seconds
 } // end of scheduler
@@ -118,14 +121,13 @@ void setup() {
 //-------------------------------------------------------------
   // fastLED initialisation
   FastLED.addLeds<CHIPSET, DATA_PIN, RGB_ORDER>(leds, NUM_LEDS);
+  FastLED.setMaxPowerInVoltsAndMilliamps(12, 1000);
   FastLED.setBrightness(brightness);
-  FastLED.clear();
-  FastLED.show();
-  pinMode(LED_BUILTIN, OUTPUT);
+  FastLED.clear(true);
+  FastLED.showColor(C_OFF);
 //-------------------------------------------------------------
   // start LittleFS file system
   LittleFS.begin();               
-  delay(200);
   {
     Dir dir = LittleFS.openDir(F("/"));
     Serialprintln("\nFile System:");
@@ -137,19 +139,23 @@ void setup() {
   }
 //-------------------------------------------------------------
   // Start WiFi
-  // WiFi.mode(WIFI_AP);
-  // WiFi.softAPConfig(local_IP, gateway, subnet);
-  // bool apConnected = WiFi.softAP(ssid, password);
-  // if (apConnected) {
-  //     Serialprintf("WiFi IP: %s\n", WiFi.softAPIP().toString().c_str());
-  // }
-  WiFi.mode(WIFI_STA);            //TODO change to AP mode
-  WiFi.begin(ssid, password);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-      Serialprintf("WiFi Failed!\n");
-      return;
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid_stn, password_stn, CHANNEL);    // try STA mode
+  int status = WiFi.waitForConnectResult(6000);
+  Serialprintf("WiFi Status:%i\n", status);
+  if (status != WL_CONNECTED) {  // can't join network so start AP
+    Serialprintf("ssid not available - switch to AP mode\n");
+    WiFi.mode(WIFI_AP);
+    WiFi.softAPConfig(server_IP, gateway, subnet);
+    WiFi.softAP(ssid_ap, password_ap, CHANNEL);
+    masterNode = true;                            // Access Point mode
+    Serialprintf("WiFi Access Point established! IP address: %s on %s\n", \
+                  WiFi.softAPIP().toString().c_str(), ssid_ap);
+  } else {
+    masterNode = false;                           // Station mode
+    Serialprintf("\nStation mode started\nIP Address: %s on %s\n", \
+                  WiFi.localIP().toString().c_str(), ssid_stn);
   }
-  Serialprintf("\nIP Address: %s\n", WiFi.localIP().toString().c_str());
 //-------------------------------------------------------------
   // Start web server
   server.on("/update", HTTP_GET, handleUpdate);
@@ -157,6 +163,6 @@ void setup() {
   server.begin();
 } // end of setup
 ///////////////////////////////////////////////////////////////////////////////
-void loop() {
+void loop() {  
   EVERY_N_MILLIS (schedInt) {scheduler();}
 }
