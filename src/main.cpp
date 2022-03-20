@@ -120,7 +120,9 @@ void setup() {
   Serialbegin(115200);
 //-------------------------------------------------------------
   // fastLED initialisation
-  FastLED.addLeds<CHIPSET, DATA_PIN, RGB_ORDER>(leds, NUM_LEDS);
+  FastLED.addLeds<CHIPSET, DATA_PIN1, RGB_ORDER>(leds, 0, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<CHIPSET, DATA_PIN2, RGB_ORDER>(leds, 174, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<CHIPSET, DATA_PIN3, RGB_ORDER>(leds, 384, NUM_LEDS_PER_STRIP);
   FastLED.setMaxPowerInVoltsAndMilliamps(12, 1000);
   FastLED.setBrightness(brightness);
   FastLED.clear(true);
@@ -140,21 +142,21 @@ void setup() {
 //-------------------------------------------------------------
   // Start WiFi
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid_stn, password_stn, CHANNEL);    // try STA mode
+  WiFi.begin(ssid, password, CHANNEL);    // try STA mode
   int status = WiFi.waitForConnectResult(6000);
   Serialprintf("WiFi Status:%i\n", status);
   if (status != WL_CONNECTED) {  // can't join network so start AP
     Serialprintf("ssid not available - switch to AP mode\n");
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(server_IP, gateway, subnet);
-    WiFi.softAP(ssid_ap, password_ap, CHANNEL);
+    WiFi.softAP(ssid, password, CHANNEL);
     masterNode = true;                            // Access Point mode
     Serialprintf("WiFi Access Point established! IP address: %s on %s\n", \
-                  WiFi.softAPIP().toString().c_str(), ssid_ap);
+                  WiFi.softAPIP().toString().c_str(), ssid);
   } else {
     masterNode = false;                           // Station mode
     Serialprintf("\nStation mode started\nIP Address: %s on %s\n", \
-                  WiFi.localIP().toString().c_str(), ssid_stn);
+                  WiFi.localIP().toString().c_str(), ssid);
   }
 //-------------------------------------------------------------
   // Start web server

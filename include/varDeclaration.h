@@ -11,14 +11,18 @@
   #define Serialbegin(baud)
 #endif
 
-#define DATA_PIN        D4
+#define DATA_PIN1       D5
+#define DATA_PIN2       D6
+#define DATA_PIN3       D7
 #define RGB_ORDER       RGB
 #define CHIPSET         WS2812  // best match for WS2815
 #define SEGMENTS        7
 #define LEDS_IN_SEGMENT 6
+#define NUM_STRIPS      3
+#define NUM_LEDS_PER_STRIP 210
 #define NUM_LEDS        594     // 14 characters * 7 segments * 6 LEDs + 6 LEDs(colon)
-#define PULSE           588     // clock pulse starting LED number
-#define PULSE_WIDTH     5       // number of LEDs in pulse
+#define PULSE           84      // clock pulse starting LED number
+#define PULSE_WIDTH     5       // number of LEDs in pulse -1
 #define CHANNEL         1
 #define ASCII_ZERO      48
 
@@ -46,27 +50,43 @@ const uint8_t  seg_mapping[16][7] = {
   {1,1,0,0,0,1,1,},     // F
   {1,1,1,0,0,0,1,}      // ° degree
 };
+// const uint16_t led_mapping[14] = {
+//   0,    // 0 score * 100
+//   42,   // 1 score * 10
+//   84,   // 2 score * 1
+//   126,  // 3 target * 100
+//   168,  // 4 target * 10
+//   210,  // 5 target * 1
+//   252,  // 6 overs * 10
+//   294,  // 7 overs * 1
+//   336,  // 8 wicket * 10
+//   378,  // 9 wicket * 1
+//   420,  // 10 hours * 10
+//   462,  // 11 hours * 1
+//   504,  // 12 minutes * 10
+//   546   // 13 minutes * 1
+// };
 const uint16_t led_mapping[14] = {
-  0,    // 0 score * 100
-  42,   // 1 score * 10
-  84,   // 2 score * 1
-  126,  // 3 target * 100
-  168,  // 4 target * 10
-  210,  // 5 target * 1
-  252,  // 6 overs * 10
-  294,  // 7 overs * 1
-  336,  // 8 wicket * 10
-  378,  // 9 wicket * 1
-  420,  // 10 hours * 10
-  462,  // 11 hours * 1
-  504,  // 12 minutes * 10
-  546   // 13 minutes * 1
+  258,    // 0 score * 100
+  300,   // 1 score * 10
+  342,   // 2 score * 1
+  468,  // 3 target * 100
+  510,  // 4 target * 10
+  552,  // 5 target * 1
+  384,  // 6 overs * 10
+  426,  // 7 overs * 1
+  174,  // 8 wicket * 10
+  216,  // 9 wicket * 1
+  0,    // 10 hours * 10
+  42,   // 11 hours * 1
+  90,   // 12 minutes * 10
+  132   // 13 minutes * 1
 };
 
 //                 score      target      overs   wicket  hours   minutes
-// Buffchr[15]	   S1	S2	S3	T1	T2	T3	O1	O2	W1	W2	H1	H2	M1	M2	\0
-// led_mapping[14]	0	42	84	126	168	210	252	294	336	378	420	462	504	546	
-// PULSE           588
+// Buffchr[15]	   S1	  S2	S3	T1	T2	T3	O1	O2	W1	W2	H1	H2	M1	M2	\0
+// led_mapping[14] 258  300	342	468	510	552	384	426	174	216	0	  42	90	132			
+// PULSE           84
 
 bool           masterNode;
 uint32_t       baseSeconds = 0;        // time stamp in seconds
