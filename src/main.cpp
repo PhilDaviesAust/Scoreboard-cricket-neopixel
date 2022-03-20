@@ -120,7 +120,7 @@ void setup() {
   Serialbegin(115200);
 //-------------------------------------------------------------
   // fastLED initialisation
-  FastLED.addLeds<CHIPSET, DATA_PIN1, RGB_ORDER>(leds, 0, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<CHIPSET, DATA_PIN1, RGB_ORDER>(leds, 0, NUM_LEDS_CLOCK);
   FastLED.addLeds<CHIPSET, DATA_PIN2, RGB_ORDER>(leds, 174, NUM_LEDS_PER_STRIP);
   FastLED.addLeds<CHIPSET, DATA_PIN3, RGB_ORDER>(leds, 384, NUM_LEDS_PER_STRIP);
   FastLED.setMaxPowerInVoltsAndMilliamps(12, 1000);
