@@ -64,6 +64,7 @@ void updateTime() {
   hours = (now/3600) % 24;
   if(hours != 12) hours = hours % 12;
   minutes = (now/60) % 60;
+  seconds = now % 60;
   buffchr[0] = (hours < 10) ? ' ': hours/10 + ASCII_ZERO;
   buffchr[1] = hours%10 + ASCII_ZERO;
   buffchr[2] = minutes/10 + ASCII_ZERO;
@@ -93,10 +94,10 @@ void handleUpdate(AsyncWebServerRequest *request) {
             request->arg(F("wicket")), request->arg(F("score")),
             request->arg(F("overs")),  request->arg(F("target"))
             );
-
+  updateTime();
   updateLEDs();
-  
-  String response = style +
+
+  String response = style + hours + ":" + minutes + ":" + seconds + "<br>" +
     "score:"    + request->arg("score")  + " overs:"  + request->arg("overs") +
     " wickets:" + request->arg("wicket") + " target:" + request->arg("target") +
     "</p></section>";

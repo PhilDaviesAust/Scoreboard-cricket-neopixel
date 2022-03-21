@@ -77,8 +77,9 @@ uint32_t       baseSeconds = 0;        // time stamp in seconds
 uint32_t       baseMillis  = 0;        // time stamp in millis
 uint8_t        hours       = 0;        // display time hours
 uint8_t        minutes     = 0;        // display time minutes
+uint8_t        seconds     = 0;        // display time seconds
 uint8_t        brightness  = 128;      // display brightness level
 uint16_t       schedInt    = 500;      // scheduler time interval (ms)
 uint8_t        schedCount  = 0;        // scheduler counter
 char           buffchr[15];            // character buffer for character display
-static const String style = "<section style='font-family:verdana;font-size:12px;'><p>Last update:<br>";
+static const String style = "<section style='font-family:verdana;font-size:12px;'><p>Last update: ";
