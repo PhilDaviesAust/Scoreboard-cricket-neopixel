@@ -53,7 +53,7 @@ void updateLEDs() {
  //  print full led array
   // Serialprintf("\n");
   // for (int i = 0; i < NUM_LEDS; i++) {
-  //   if(i%42 == 0) Serialprintf("\n\ncharacter %i = '%c'\n", i/42, buffchr[i/42]);
+  //   //if(i%42 == 0) Serialprintf("\n\ncharacter %i = '%c'\n", i/42, buffchr[i/42]);
   //   if(i%6 == 0) Serialprintf("\n");
   //   Serialprintf("led[%i] %3i\t", i, leds[i].g);
   // }
@@ -64,10 +64,10 @@ void updateTime() {
   hours = (now/3600) % 24;
   if(hours != 12) hours = hours % 12;
   minutes = (now/60) % 60;
-  buffchr[10] = (hours < 10) ? ' ': hours/10 + ASCII_ZERO;
-  buffchr[11] = hours%10 + ASCII_ZERO;
-  buffchr[12] = minutes/10 + ASCII_ZERO;
-  buffchr[13] = minutes%10 + ASCII_ZERO;
+  buffchr[0] = (hours < 10) ? ' ': hours/10 + ASCII_ZERO;
+  buffchr[1] = hours%10 + ASCII_ZERO;
+  buffchr[2] = minutes/10 + ASCII_ZERO;
+  buffchr[3] = minutes%10 + ASCII_ZERO;
   updateLEDs();
 } // end of updateTime
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,10 +88,12 @@ void handleUpdate(AsyncWebServerRequest *request) {
   baseMillis  = millis();
   baseSeconds = (request->arg("seconds")).toInt();
   brightness  = map(request->arg("brightness").toInt(), 0, 10, 0, 255);
-  snprintf (buffchr, sizeof(buffchr), PSTR("%3s%3s%2s%2s%2u%02u"), 
-            request->arg(F("score")), request->arg(F("target")),
-            request->arg(F("overs")), request->arg(F("wicket")),
-            hours, minutes);
+  snprintf (buffchr, sizeof(buffchr), PSTR("%2u%02u%2s%3s%2s%3s"), 
+            hours, minutes,
+            request->arg(F("wicket")), request->arg(F("score")),
+            request->arg(F("overs")),  request->arg(F("target"))
+            );
+
   updateLEDs();
   
   String response = style +
@@ -111,7 +113,7 @@ void scheduler() {
 
   FastLED.show();                           // update display every 500 millis
   FastLED.delay(2);
-  Serialprintf("Frames:%i\n", FastLED.getFPS());
+  //Serialprintf("Frames:%i\n", FastLED.getFPS());
 
   schedCount %= 60;                         // cycle every 30 seconds
 } // end of scheduler
@@ -150,11 +152,11 @@ void setup() {
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(server_IP, gateway, subnet);
     WiFi.softAP(ssid, password, CHANNEL);
-    masterNode = true;                            // Access Point mode
+    // Access Point mode
     Serialprintf("WiFi Access Point established! IP address: %s on %s\n", \
                   WiFi.softAPIP().toString().c_str(), ssid);
   } else {
-    masterNode = false;                           // Station mode
+    // Station mode
     Serialprintf("\nStation mode started\nIP Address: %s on %s\n", \
                   WiFi.localIP().toString().c_str(), ssid);
   }
