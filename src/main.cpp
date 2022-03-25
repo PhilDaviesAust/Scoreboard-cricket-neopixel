@@ -95,25 +95,25 @@ void handleUpdate(AsyncWebServerRequest *request) {
             request->arg(F("overs")),  request->arg(F("target"))
             );
   updateTime();
-  updateLEDs();
+  //updateLEDs();
 
   String response = style + hours + ":" + minutes + ":" + seconds + "<br>" +
     "score:"    + request->arg("score")  + " overs:"  + request->arg("overs") +
     " wickets:" + request->arg("wicket") + " target:" + request->arg("target") +
     "</p></section>";
   request->send(200, "text/html",  response);
-  Serialprintf("\nupdate complete\n");
+  Serialprintf("\nupdate complete: %s\n", response.c_str());
 } // end of handleUpdate
 ///////////////////////////////////////////////////////////////////////////////
 void scheduler() {
   schedCount++;
 
-  if(schedCount == 1) updateTime();         // update the time every 30 seconds
+  if(schedCount%20 == 1) updateTime();      // update the time every 10 seconds
 
   leds(PULSE, PULSE+PULSE_WIDTH) = (schedCount%2 == 0) ? C_ON: C_OFF;  // pulse the clock :
 
   FastLED.show();                           // update display every 500 millis
-  FastLED.delay(2);
+  FastLED.delay(1);
   //Serialprintf("Frames:%i\n", FastLED.getFPS());
 
   schedCount %= 60;                         // cycle every 30 seconds
@@ -124,8 +124,8 @@ void setup() {
 //-------------------------------------------------------------
   // fastLED initialisation
   FastLED.addLeds<CHIPSET, DATA_PIN1, RGB_ORDER>(leds, 0, NUM_LEDS_CLOCK);
-  FastLED.addLeds<CHIPSET, DATA_PIN2, RGB_ORDER>(leds, 174, NUM_LEDS_PER_STRIP);
-  FastLED.addLeds<CHIPSET, DATA_PIN3, RGB_ORDER>(leds, 384, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<CHIPSET, DATA_PIN2, RGB_ORDER>(leds, 174, LEDS_PER_STRIP);
+  FastLED.addLeds<CHIPSET, DATA_PIN3, RGB_ORDER>(leds, 384, LEDS_PER_STRIP);
   FastLED.setMaxPowerInVoltsAndMilliamps(12, 1000);
   FastLED.setBrightness(brightness);
   FastLED.clear(true);

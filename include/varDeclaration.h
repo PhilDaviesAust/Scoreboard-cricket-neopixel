@@ -1,4 +1,4 @@
-#define DEBUG_STATE true
+#define DEBUG_STATE false
 #if DEBUG_STATE
   #define Serialprint(...) Serial.print(__VA_ARGS__)
   #define Serialprintln(...) Serial.println(__VA_ARGS__)
@@ -19,7 +19,7 @@
 #define SEGMENTS        7
 #define LEDS_IN_SEGMENT 6
 #define NUM_STRIPS      3
-#define NUM_LEDS_PER_STRIP 210
+#define LEDS_PER_STRIP  210
 #define NUM_LEDS_CLOCK  174
 #define NUM_LEDS        594     // 14 characters * 7 segments * 6 LEDs + 6 LEDs(colon)
 #define PULSE           84      // clock pulse starting LED number
@@ -28,7 +28,7 @@
 #define ASCII_ZERO      48
 
 CRGBArray<NUM_LEDS>     leds;
-const CRGB              C_ON   = CRGB::Green;
+const CRGB              C_ON   = CRGB::Blue;
 const CRGB              C_OFF  = CRGB::Black;
 AsyncWebServer          server(80);
 
@@ -73,13 +73,13 @@ const uint16_t led_mapping[14] = {
 // led_mapping[14] 0  42	90	132	 174 216 258 300 342	384	426	468 510	552			
 // PULSE           84
 
-uint32_t       baseSeconds = 0;        // time stamp in seconds
-uint32_t       baseMillis  = 0;        // time stamp in millis
 uint8_t        hours       = 0;        // display time hours
 uint8_t        minutes     = 0;        // display time minutes
 uint8_t        seconds     = 0;        // display time seconds
 uint8_t        brightness  = 128;      // display brightness level
-uint16_t       schedInt    = 500;      // scheduler time interval (ms)
 uint8_t        schedCount  = 0;        // scheduler counter
+uint16_t       schedInt    = 500;      // scheduler time interval (ms)
+uint32_t       baseSeconds = 0;        // time stamp in seconds
+uint32_t       baseMillis  = 0;        // time stamp in millis
 char           buffchr[15];            // character buffer for character display
-static const String style = "<section style='font-family:verdana;font-size:12px;'><p>Last update: ";
+static const String style  = "<section style='font-family:verdana;font-size:12px;'><p>Last update: ";
