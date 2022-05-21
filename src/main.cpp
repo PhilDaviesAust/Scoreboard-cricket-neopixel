@@ -106,6 +106,7 @@ void handleUpdate(AsyncWebServerRequest *request) {
 } // end of handleUpdate
 ///////////////////////////////////////////////////////////////////////////////
 void scheduler() {
+  static uint8_t schedCount;
   schedCount++;
 
   if(schedCount%20 == 1) updateTime();      // update the time every 10 seconds
