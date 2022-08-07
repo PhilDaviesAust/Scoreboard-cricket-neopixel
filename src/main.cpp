@@ -23,17 +23,8 @@ String getContentType(String url) {
   else if(url.endsWith(".gif"))  return "image/gif";
   else if(url.endsWith(".jpg"))  return "image/jpeg";
   else if(url.endsWith(".ico"))  return "image/x-icon";
-  else if(url.endsWith(".xml"))  return "text/xml";
-  else if(url.endsWith(".pdf"))  return "application/x-pdf";
-  else if(url.endsWith(".zip"))  return "application/x-zip";
-  else if(url.endsWith(".gz"))   return "application/x-gzip";
   return "text/plain";
 } // end of getContentType
-///////////////////////////////////////////////////////////////////////////////
-String formatBytes(size_t bytes) {
-  if (bytes < 1024) return String(bytes)+"B";
-  else return String(bytes/1024.0)+"KB";
-} // end of formatBytes
 ///////////////////////////////////////////////////////////////////////////////
 void updateLEDs() {
   int16_t index, ledNo; 
@@ -124,9 +115,20 @@ void scheduler() {
   schedCount %= 60;                         // cycle every 30 seconds
 } // end of scheduler
 ///////////////////////////////////////////////////////////////////////////////
-void setup() {
-  Serialbegin(115200);
-//-------------------------------------------------------------
+void setup_FileSystem() {
+  LittleFS.begin();                 // start LittleFS file system            
+  #if DEBUG_STATE
+    Dir dir = LittleFS.openDir("/");
+    Serialprintln("\nLittleFS File System:");
+    while (dir.next()) {
+      Serialprintf(" File: %-28s size: %8u bytes\n",
+                  dir.fileName().c_str(), dir.fileSize());
+    }
+  #endif
+  Serialprintf("file system setup\n");
+}
+///////////////////////////////////////////////////////////////////////////////
+void setup_FastLED() {
   // fastLED initialisation
   FastLED.addLeds<CHIPSET, DATA_PIN1, RGB_ORDER>(leds, 0, NUM_LEDS_CLOCK);
   FastLED.addLeds<CHIPSET, DATA_PIN2, RGB_ORDER>(leds, 174, LEDS_PER_STRIP);
@@ -135,20 +137,10 @@ void setup() {
   FastLED.setBrightness(brightness);
   FastLED.clear(true);
   FastLED.showColor(C_OFF);
-//-------------------------------------------------------------
-  // start LittleFS file system
-  LittleFS.begin();               
-  {
-    Dir dir = LittleFS.openDir(F("/"));
-    Serialprintln("\nFile System:");
-    while (dir.next()) {
-      Serialprintf(" File: %-28s size: %8s\n", dir.fileName().c_str(), \
-                   formatBytes(dir.fileSize()).c_str());
-    }
-    Serialprintf("\n");
-  }
-//-------------------------------------------------------------
-  // Start WiFi
+  Serialprintf("FastLED Display setup\n");
+}
+///////////////////////////////////////////////////////////////////////////////
+void setup_WiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password, CHANNEL);    // try STA mode
   int status = WiFi.waitForConnectResult(6000);
@@ -166,13 +158,22 @@ void setup() {
     Serialprintf("\nStation mode started\nIP Address: %s on %s\n", \
                   WiFi.localIP().toString().c_str(), ssid);
   }
-//-------------------------------------------------------------
-  // Start web server
+}
+///////////////////////////////////////////////////////////////////////////////
+void setup_Server() {
   server.on("/update", HTTP_GET, handleUpdate);
   server.onNotFound(handleServeFile);       // any other url
   server.begin();
+}
+///////////////////////////////////////////////////////////////////////////////
+void setup() {
+  Serialbegin(115200);
+  setup_FastLED();                      // fastLED initialisation
+  setup_FileSystem();                   // start LittleFS file system
+  setup_WiFi();                         // Start WiFi
+  setup_Server();                       // Start web server
 } // end of setup
 ///////////////////////////////////////////////////////////////////////////////
 void loop() {  
-  EVERY_N_MILLIS (schedInt) {scheduler();}
+  EVERY_N_MILLIS(schedInt) scheduler();
 }

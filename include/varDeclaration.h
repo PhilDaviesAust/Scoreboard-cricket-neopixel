@@ -25,12 +25,12 @@
 #define PULSE           84      // clock pulse starting LED number
 #define PULSE_WIDTH     5       // number of LEDs in pulse -1
 #define LED_VOLTAGE     12      // LED strip voltage
-#define LED_CURRENT     1000    // LED strip max current (milliamps)
+#define LED_CURRENT     10000   // LED strip max current (milliamps)
 #define CHANNEL         1
 #define ASCII_ZERO      48
 
 CRGBArray<NUM_LEDS>     leds;
-const CRGB              C_ON   = CRGB::DodgerBlue;
+const CRGB              C_ON   = CRGB::Aqua;
 const CRGB              C_OFF  = CRGB::Black;
 AsyncWebServer          server(80);
 ESPClock                myClock;
