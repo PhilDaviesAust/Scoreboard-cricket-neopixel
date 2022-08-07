@@ -8,6 +8,7 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
 #include "LittleFS.h"
 #include <FastLED.h>
 #include "ESPClock.h"
@@ -143,7 +144,7 @@ void setup_FastLED() {
 void setup_WiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password, CHANNEL);    // try STA mode
-  int status = WiFi.waitForConnectResult(6000);
+  int status = WiFi.waitForConnectResult(5000);
   Serialprintf("WiFi Status:%i\n", status);
   if (status != WL_CONNECTED) {  // can't join network so start AP
     Serialprintf("ssid not available - switch to AP mode\n");
@@ -161,7 +162,7 @@ void setup_WiFi() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 void setup_Server() {
-  server.on("/update", HTTP_GET, handleUpdate);
+  server.on("/scoreboardupdate", HTTP_GET, handleUpdate);
   server.onNotFound(handleServeFile);       // any other url
   server.begin();
 }
@@ -171,6 +172,7 @@ void setup() {
   setup_FastLED();                      // fastLED initialisation
   setup_FileSystem();                   // start LittleFS file system
   setup_WiFi();                         // Start WiFi
+  if(WiFi.getMode() == WIFI_AP) AsyncElegantOTA.begin(&server); // Start AsyncElegantOTA
   setup_Server();                       // Start web server
 } // end of setup
 ///////////////////////////////////////////////////////////////////////////////

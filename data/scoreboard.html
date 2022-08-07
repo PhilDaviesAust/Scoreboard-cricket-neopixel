@@ -10,12 +10,13 @@
 	<header>
 		<img src="Ball90.png" alt="Ball"><h1>Scoreboard</h1>
 	</header>
-	<form action="update" target="responseframe">
+	<form action="scoreboardupdate" target="responseframe">
 		<section class="btnPanel">
 			<label for="score">Score:</label>
 			<button type="button" class="btn count" data-dir="-1" onclick="clickHandler(this)">-</button>				
 			<input type="text" class="inputScoreBox" id="score" name="score" value="0" onblur="blurHandler(this)">
 			<button type="button" class="btn count" data-dir="1" onclick="clickHandler(this)">+</button>				
+			<button type="button" class="btn count" data-dir="4" onclick="clickHandler(this)">+4</button>				
 		</section>
 		<section class="btnPanel">
 			<label for="overs">Overs:</label>
@@ -31,13 +32,13 @@
 		</section>
 		<section class="btnPanel">
 			<label for="target">Target:</label>
-			<button type="button" class="btn count" data-dir="-1" onclick="clickHandler(this)">-</button>
+			<!--<button type="button" class="btn count" data-dir="-1" onclick="clickHandler(this)">-</button>-->
 			<input type="text" class="inputScoreBox" id="target" name="target" value="0" onblur="blurHandler(this)">
-			<button type="button" class="btn count" data-dir="1" onclick="clickHandler(this)">+</button>
+			<!--<button type="button" class="btn count" data-dir="1" onclick="clickHandler(this)">+</button>-->
 		</section>
 		<section class="btnPanel slrPanel">
 			<label for="brightness">Brightness: L </label> 
-			<input type="range" id="brightness" class="slider" name="brightness" min="0" max="10" step="1" value="2">
+			<input type="range" id="brightness" class="slider" name="brightness" min="0" max="10" step="1" value="10">
 			<label style="width: auto;">H</label>
 		</section>
 		<section style="display: none;">
