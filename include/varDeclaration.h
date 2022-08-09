@@ -11,6 +11,8 @@
   #define Serialbegin(baud)
 #endif
 
+#define SCL_PIN         D1      // DHT12 clock pin (GPIO5)
+#define SDA_PIN         D2      // DHT12 data pin (GPIO4)
 #define DATA_PIN1       D5
 #define DATA_PIN2       D6
 #define DATA_PIN3       D7
@@ -30,12 +32,11 @@
 #define ASCII_ZERO      48
 
 CRGBArray<NUM_LEDS>     leds;
-const CRGB              C_ON   = CRGB::Aqua;
-const CRGB              C_OFF  = CRGB::Black;
 AsyncWebServer          server(80);
+DHT12                   dht12;  // use default pins SCL=D1 SDA=D2
 ESPClock                myClock;
 
-const uint8_t seg_mapping_LED[11] = {   //used by FastLED
+const uint8_t seg_mapping_LED[13] = {   //used by FastLED
 //  XGEDCBAF      Segments
   0b00111111,     // 0  Digit 0  ascii 48
   0b00001100,     // 1  Digit 1  ascii 49        AA
@@ -47,8 +48,12 @@ const uint8_t seg_mapping_LED[11] = {   //used by FastLED
   0b00001110,     // 7  Digit 7  ascii 55        DD
   0b01111111,     // 8  Digit 8  ascii 56
   0b01011111,     // 9  Digit 9  ascii 57
-  0b00000000      // 10 blank    ascii 32
+  0b00000000,     // 10 blank    ascii 32
+  0b01000111,     // 11 ° degree ascii 59 ;
+  0b00110011      // 12 C        ascii 60 <
 };
+const char      deg         = ';';      // ascii 59
+const char      C           = '<';      // ascii 60
 
 const uint16_t char_mapping_LED[14] = {
   0,    // 0 hours * 10

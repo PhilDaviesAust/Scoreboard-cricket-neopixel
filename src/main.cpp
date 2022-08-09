@@ -11,6 +11,7 @@
 #include <AsyncElegantOTA.h>
 #include "LittleFS.h"
 #include <FastLED.h>
+#include <WEMOS_DHT12.h>
 #include "ESPClock.h"
 #include "credentials.h"
 #include "varDeclaration.h"
@@ -29,6 +30,7 @@ String getContentType(String url) {
 ///////////////////////////////////////////////////////////////////////////////
 void updateLEDs() {
   int16_t index, ledNo; 
+  CRGB onColour = CRGB::Aqua;
   //Serialprintf("\nxxxxxxxxxxxxxxx\n");
   //Serialprintf("Free heap:%i bytes in updateLEDs\tfragmentation:%i%%\n", ESP.getFreeHeap(), ESP.getHeapFragmentation());
 
@@ -39,7 +41,7 @@ void updateLEDs() {
     for (uint8_t segNo = 0; segNo < SEGMENTS; segNo++)              // cycle through segments in character
     {
       ledNo = char_mapping_LED[charNo] + (segNo * LEDS_IN_SEGMENT);
-      leds(ledNo, ledNo + LEDS_IN_SEGMENT - 1) = ((seg_mapping_LED[index] >> segNo) & 0b00000001) ? C_ON : C_OFF;
+      leds(ledNo, ledNo + LEDS_IN_SEGMENT - 1) = ((seg_mapping_LED[index] >> segNo) & 0b00000001) ? onColour : CRGB::Black;
       //Serialprintf("seg:%i led:%3i val:%3i\t", segNo, ledNo, leds[ledNo].g);
     }
   }
@@ -51,6 +53,16 @@ void updateLEDs() {
   // }
 } // end of updateLEDs
 ///////////////////////////////////////////////////////////////////////////////
+bool updateTemperature() {
+  if(dht12.get() != 0) return false;
+  uint8_t degrees = dht12.cTemp;
+  buffchr[0] = (degrees < 10) ? ' ': degrees/10 + ASCII_ZERO;
+  buffchr[1] = degrees%10 + ASCII_ZERO;
+  buffchr[2] = deg;
+  buffchr[3] = C;
+  return true;
+}
+///////////////////////////////////////////////////////////////////////////////
 bool updateTime() {
   if(!myClock.isSet()) return false;
   uint8_t hours = myClock.getHours();
@@ -59,14 +71,12 @@ bool updateTime() {
   buffchr[1] = hours%10 + ASCII_ZERO;
   buffchr[2] = minutes/10 + ASCII_ZERO;
   buffchr[3] = minutes%10 + ASCII_ZERO;
-  updateLEDs();
   return true;
 }
 ///////////////////////////////////////////////////////////////////////////////
 void handleServeFile(AsyncWebServerRequest *request) {
   String url = request->url();
   if(url == "/") url = "/scoreboard.html";          // default page
-  if(LittleFS.exists(url + ".gz")) url += ".gz";    // use gzip version if available
   if(LittleFS.exists(url)){
     String contentType = getContentType(url);
     request->send(LittleFS, url, contentType, false);
@@ -85,12 +95,12 @@ void handleUpdate(AsyncWebServerRequest *request) {
             request->arg(F("overs")),  request->arg(F("target"))
             );
   updateTime();
-  //updateLEDs();
+  updateLEDs();
 
-  char response[128];       // response max chars 112
-  char style[] = "<section style='font-family:verdana;font-size:1em;'>";
+  char response[144];       // response max chars 139
+  char style[] = "<section style='font-family:verdana;font-size:1em;'><p>Last update: ";
   snprintf (response, sizeof(response),
-    PSTR("%s<p>Last update: Time:%s<br>score:%s overs:%s wickets:%s target:%s</p></section>"),
+    PSTR("%sTime:%s<br>score:%s overs:%s wickets:%s target:%s</p></section>"),
             style, myClock.getTime().c_str(),
             request->arg("score"),
             request->arg("overs"),
@@ -103,16 +113,15 @@ void handleUpdate(AsyncWebServerRequest *request) {
 ///////////////////////////////////////////////////////////////////////////////
 void scheduler() {
   static uint8_t schedCount;
-  schedCount++;
 
-  if(schedCount % 20 == 1) updateTime();    // update the time every 10 seconds
-
-  leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? C_ON: C_OFF;  // pulse the clock :
+  if(schedCount%20 == 0 && updateTime()) updateLEDs();  // update the time every 10 seconds
+  leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? CRGB::Aqua : CRGB::Black;  // pulse the clock :
 
   FastLED.show();                           // update display every 500 millis
-  FastLED.delay(1);
-  //Serialprintf("Frames:%i\n", FastLED.getFPS());
+  //FastLED.delay(1);                       // shouldn't be necessary
 
+  //Serialprintf("Frames:%i\n", FastLED.getFPS());
+  schedCount++;
   schedCount %= 60;                         // cycle every 30 seconds
 } // end of scheduler
 ///////////////////////////////////////////////////////////////////////////////
@@ -137,7 +146,7 @@ void setup_FastLED() {
   FastLED.setMaxPowerInVoltsAndMilliamps(LED_VOLTAGE, LED_CURRENT);
   FastLED.setBrightness(brightness);
   FastLED.clear(true);
-  FastLED.showColor(C_OFF);
+  FastLED.showColor(CRGB::Black);
   Serialprintf("FastLED Display setup\n");
 }
 ///////////////////////////////////////////////////////////////////////////////
