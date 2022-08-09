@@ -30,18 +30,20 @@ String getContentType(String url) {
 ///////////////////////////////////////////////////////////////////////////////
 void updateLEDs() {
   int16_t index, ledNo; 
-  CRGB onColour = CRGB::Aqua;
+  CRGB onColour = BLANK_COLOUR;
   //Serialprintf("\nxxxxxxxxxxxxxxx\n");
   //Serialprintf("Free heap:%i bytes in updateLEDs\tfragmentation:%i%%\n", ESP.getFreeHeap(), ESP.getHeapFragmentation());
 
   FastLED.setBrightness(brightness);
   for (uint8_t charNo = 0; charNo < sizeof(buffchr)-1; charNo++) {  // cycle through characters in buffchar
-    if((index = buffchr[charNo] - ASCII_ZERO) < 0) index = 10;        // ascii to decimal, adjust space character
-    //Serialprintf("\n\nChar No: %i Character: %i\n", charNo, index);
+    onColour = (charNo < 4) ? TIME_COLOUR : SCORE_COLOUR;            // set time/score colour
+    if(buffchr[2] == deg) onColour = TEMP_COLOUR;                   // set temperature colour
+    if((index = buffchr[charNo] - ASCII_ZERO) < 0) index = 10;      // ascii to decimal, adjust space character
+    //Serialprintf("\n\nChar No: %i Character: %i colour:%3i:%3i:%3i\n", charNo, index, onColour.r, onColour.g, onColour.b);
     for (uint8_t segNo = 0; segNo < SEGMENTS; segNo++)              // cycle through segments in character
     {
       ledNo = char_mapping_LED[charNo] + (segNo * LEDS_IN_SEGMENT);
-      leds(ledNo, ledNo + LEDS_IN_SEGMENT - 1) = ((seg_mapping_LED[index] >> segNo) & 0b00000001) ? onColour : CRGB::Black;
+      leds(ledNo, ledNo + LEDS_IN_SEGMENT - 1) = ((seg_mapping_LED[index] >> segNo) & 0b00000001) ? onColour : BLANK_COLOUR;
       //Serialprintf("seg:%i led:%3i val:%3i\t", segNo, ledNo, leds[ledNo].g);
     }
   }
@@ -113,9 +115,22 @@ void handleUpdate(AsyncWebServerRequest *request) {
 ///////////////////////////////////////////////////////////////////////////////
 void scheduler() {
   static uint8_t schedCount;
-
-  if(schedCount%20 == 0 && updateTime()) updateLEDs();  // update the time every 10 seconds
-  leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? CRGB::Aqua : CRGB::Black;  // pulse the clock :
+  static CRGB pulseColour = PULSE_COLOUR;
+  switch (schedCount) {
+    case 0:
+      if(updateTemperature()){
+        updateLEDs();
+        pulseColour = BLANK_COLOUR;
+      } 
+      break;
+    case 10:
+      if(updateTime()) {
+        updateLEDs();
+        pulseColour = PULSE_COLOUR;
+      } 
+      break;
+  }
+  leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? pulseColour : BLANK_COLOUR;  // pulse the clock :
 
   FastLED.show();                           // update display every 500 millis
   //FastLED.delay(1);                       // shouldn't be necessary
@@ -123,7 +138,7 @@ void scheduler() {
   //Serialprintf("Frames:%i\n", FastLED.getFPS());
   schedCount++;
   schedCount %= 60;                         // cycle every 30 seconds
-} // end of scheduler
+}
 ///////////////////////////////////////////////////////////////////////////////
 void setup_FileSystem() {
   LittleFS.begin();                 // start LittleFS file system            
@@ -146,7 +161,7 @@ void setup_FastLED() {
   FastLED.setMaxPowerInVoltsAndMilliamps(LED_VOLTAGE, LED_CURRENT);
   FastLED.setBrightness(brightness);
   FastLED.clear(true);
-  FastLED.showColor(CRGB::Black);
+  FastLED.showColor(BLANK_COLOUR);
   Serialprintf("FastLED Display setup\n");
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -183,8 +198,8 @@ void setup() {
   setup_WiFi();                         // Start WiFi
   if(WiFi.getMode() == WIFI_AP) AsyncElegantOTA.begin(&server); // Start AsyncElegantOTA
   setup_Server();                       // Start web server
-} // end of setup
+}
 ///////////////////////////////////////////////////////////////////////////////
 void loop() {  
-  EVERY_N_MILLIS(schedInt) scheduler();
+  EVERY_N_MILLIS(SCHED_INT) scheduler();
 }

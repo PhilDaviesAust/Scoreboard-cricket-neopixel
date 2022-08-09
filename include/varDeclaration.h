@@ -30,6 +30,13 @@
 #define LED_CURRENT     10000   // LED strip max current (milliamps)
 #define CHANNEL         1
 #define ASCII_ZERO      48
+#define SCHED_INT       500     // scheduler time interval (ms)
+
+#define PULSE_COLOUR    CRGB::YellowGreen
+#define TIME_COLOUR     CRGB::YellowGreen
+#define SCORE_COLOUR    CRGB::Aqua
+#define TEMP_COLOUR     CRGB::Green
+#define BLANK_COLOUR    CRGB::Black
 
 CRGBArray<NUM_LEDS>     leds;
 AsyncWebServer          server(80);
@@ -52,14 +59,14 @@ const uint8_t seg_mapping_LED[13] = {   //used by FastLED
   0b01000111,     // 11 ° degree ascii 59 ;
   0b00110011      // 12 C        ascii 60 <
 };
-const char      deg         = ';';      // ascii 59
-const char      C           = '<';      // ascii 60
+const char    deg = ';';      // ascii 59
+const char    C   = '<';      // ascii 60
 
 const uint16_t char_mapping_LED[14] = {
-  0,    // 0 hours * 10
-  42,   // 1 hours * 1
-  90,   // 2 minutes * 10
-  132,  // 3 minutes * 1
+  0,    // 0 hours * 10     temp * 10
+  42,   // 1 hours * 1      temp * 1
+  90,   // 2 minutes * 10   deg
+  132,  // 3 minutes * 1    C
   174,  // 4 wicket * 10
   216,  // 5 wicket * 1
   258,  // 6 score * 100
@@ -72,12 +79,11 @@ const uint16_t char_mapping_LED[14] = {
   552   // 13 target * 1
 };
 
+char           buffchr[15];            // character buffer for character display
+
 //                      hours  minutes  wicket   score        overs   target           
 // Buffchr[15]	        H1	H2	M1	M2	 W1	W2	 S1 S2  S3	  O1	O2	T1	T2	T3	\0
 // char_mapping_LED[14] 0   42	90	132	 174 216 258 300 342	384	426	468 510	552			
 // PULSE                84
 
 uint8_t        brightness  = 128;      // display brightness level
-uint16_t       schedInt    = 500;      // scheduler time interval (ms)
-char           buffchr[15];            // character buffer for character display
-//static const String style  = "<section style='font-family:verdana;font-size:12px;'><p>Last update: ";
