@@ -113,6 +113,12 @@ void handleUpdate(AsyncWebServerRequest *request) {
   Serialprintf("\nupdate complete: %s\n", response);
 } // end of handleUpdate
 ///////////////////////////////////////////////////////////////////////////////
+void LEDStartup(){
+  static uint8_t hue = 0;
+  FastLED.showColor(CHSV(hue+5, 255, 200));
+  hue %= 255;
+}
+///////////////////////////////////////////////////////////////////////////////
 void scheduler() {
   static uint8_t schedCount;
   static CRGB pulseColour = PULSE_COLOUR;
@@ -132,8 +138,13 @@ void scheduler() {
   }
   leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? pulseColour : BLANK_COLOUR;  // pulse the clock :
 
-  FastLED.show();                           // update display every 500 millis
-  //FastLED.delay(1);                       // shouldn't be necessary
+  if(!myClock.isSet()) {
+    LEDStartup();
+  } 
+  else {
+    FastLED.show();                           // update display every 500 millis
+    //FastLED.delay(1);                       // shouldn't be necessary
+  }
 
   //Serialprintf("Frames:%i\n", FastLED.getFPS());
   schedCount++;
@@ -161,7 +172,7 @@ void setup_FastLED() {
   FastLED.setMaxPowerInVoltsAndMilliamps(LED_VOLTAGE, LED_CURRENT);
   FastLED.setBrightness(brightness);
   FastLED.clear(true);
-  FastLED.showColor(BLANK_COLOUR);
+  FastLED.showColor(TEMP_COLOUR);
   Serialprintf("FastLED Display setup\n");
 }
 ///////////////////////////////////////////////////////////////////////////////
