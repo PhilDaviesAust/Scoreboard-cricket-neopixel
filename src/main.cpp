@@ -115,7 +115,7 @@ void handleUpdate(AsyncWebServerRequest *request) {
 ///////////////////////////////////////////////////////////////////////////////
 void LEDStartup(){
   static uint8_t hue = 0;
-  FastLED.showColor(CHSV(hue+5, 255, 200));
+  FastLED.showColor(CHSV(hue+5, 255, 127));
   hue %= 255;
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ void scheduler() {
 
   //Serialprintf("Frames:%i\n", FastLED.getFPS());
   schedCount++;
-  schedCount %= 60;                         // cycle every 30 seconds
+  schedCount %= 60;                           // cycle every 30 seconds             
 }
 ///////////////////////////////////////////////////////////////////////////////
 void setup_FileSystem() {
