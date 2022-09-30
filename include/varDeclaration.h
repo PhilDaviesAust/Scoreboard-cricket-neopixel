@@ -1,4 +1,4 @@
-#define DEBUG_STATE true
+#define DEBUG_STATE false
 #if DEBUG_STATE
   #define Serialprint(...) Serial.print(__VA_ARGS__)
   #define Serialprintln(...) Serial.println(__VA_ARGS__)
@@ -35,7 +35,7 @@
 #define PULSE_COLOUR    CRGB::YellowGreen
 #define TIME_COLOUR     CRGB::YellowGreen
 #define SCORE_COLOUR    CRGB::Aqua
-#define TEMP_COLOUR     CRGB::Green
+#define TEMP_COLOUR     CRGB::OrangeRed
 #define BLANK_COLOUR    CRGB::Black
 
 CRGBArray<NUM_LEDS>     leds;

@@ -115,8 +115,9 @@ void handleUpdate(AsyncWebServerRequest *request) {
 ///////////////////////////////////////////////////////////////////////////////
 void LEDStartup(){
   static uint8_t hue = 0;
-  FastLED.showColor(CHSV(hue+5, 255, 127));
-  hue %= 255;
+  FastLED.showColor(CHSV(hue, 255, 127));
+  //Serialprintf("Startup hue:%i\n", hue);
+  hue = (hue + 5) % 255;
 }
 ///////////////////////////////////////////////////////////////////////////////
 void scheduler() {
