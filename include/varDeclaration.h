@@ -24,6 +24,9 @@
 #define LEDS_PER_STRIP  210
 #define NUM_LEDS_CLOCK  174
 #define NUM_LEDS        594     // 14 characters * 7 segments * 6 LEDs + 6 LEDs(colon)
+#define STRIP1_START    0       // LED strip 1 starting LED number
+#define STRIP2_START    174     // LED strip 2 starting LED number
+#define STRIP3_START    384     // LED strip 3 starting LED number
 #define PULSE           84      // clock pulse starting LED number
 #define PULSE_WIDTH     5       // number of LEDs in pulse -1
 #define LED_VOLTAGE     12      // LED strip voltage

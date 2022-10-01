@@ -100,14 +100,12 @@ void handleUpdate(AsyncWebServerRequest *request) {
   updateLEDs();
 
   char response[144];       // response max chars 139
-  char style[] = "<section style='font-family:verdana;font-size:1em;'><p>Last update: ";
+  const char style[] = "<section style='font-family:verdana;font-size:1em;'><p>Last update: ";
   snprintf (response, sizeof(response),
     PSTR("%sTime:%s<br>score:%s overs:%s wickets:%s target:%s</p></section>"),
             style, myClock.getTime().c_str(),
-            request->arg("score"),
-            request->arg("overs"),
-            request->arg("wicket"),
-            request->arg("target")
+            request->arg("score"), request->arg("overs"),
+            request->arg("wicket"), request->arg("target")
             );
   request->send(200, "text/html",  response);
   Serialprintf("\nupdate complete: %s\n", response);
@@ -167,34 +165,32 @@ void setup_FileSystem() {
 ///////////////////////////////////////////////////////////////////////////////
 void setup_FastLED() {
   // fastLED initialisation
-  FastLED.addLeds<CHIPSET, DATA_PIN1, RGB_ORDER>(leds, 0, NUM_LEDS_CLOCK);
-  FastLED.addLeds<CHIPSET, DATA_PIN2, RGB_ORDER>(leds, 174, LEDS_PER_STRIP);
-  FastLED.addLeds<CHIPSET, DATA_PIN3, RGB_ORDER>(leds, 384, LEDS_PER_STRIP);
+  FastLED.addLeds<CHIPSET, DATA_PIN1, RGB_ORDER>(leds, STRIP1_START, NUM_LEDS_CLOCK);
+  FastLED.addLeds<CHIPSET, DATA_PIN2, RGB_ORDER>(leds, STRIP2_START, LEDS_PER_STRIP);
+  FastLED.addLeds<CHIPSET, DATA_PIN3, RGB_ORDER>(leds, STRIP3_START, LEDS_PER_STRIP);
   FastLED.setMaxPowerInVoltsAndMilliamps(LED_VOLTAGE, LED_CURRENT);
   FastLED.setBrightness(brightness);
   FastLED.clear(true);
-  FastLED.showColor(TEMP_COLOUR);
+  FastLED.showColor(BLANK_COLOUR);
   Serialprintf("FastLED Display setup\n");
 }
 ///////////////////////////////////////////////////////////////////////////////
 void setup_WiFi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password, CHANNEL);    // try STA mode
-  int status = WiFi.waitForConnectResult(5000);
-  Serialprintf("WiFi Status:%i\n", status);
-  if (status != WL_CONNECTED) {  // can't join network so start AP
-    Serialprintf("ssid not available - switch to AP mode\n");
+  // WiFi.mode(WIFI_STA);
+  // WiFi.begin(ssid, password, CHANNEL);    // try STA mode
+  // int status = WiFi.waitForConnectResult(5000);
+  // Serialprintf("WiFi Status:%i\n", status);
+  // if (status != WL_CONNECTED) {  // can't join network so start AP
+  //  Serialprintf("ssid not available - switch to AP mode\n");
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(server_IP, gateway, subnet);
     WiFi.softAP(ssid, password, CHANNEL);
     // Access Point mode
     Serialprintf("WiFi Access Point established! IP address: %s on %s\n", \
                   WiFi.softAPIP().toString().c_str(), ssid);
-  } else {
-    // Station mode
-    Serialprintf("\nStation mode started\nIP Address: %s on %s\n", \
-                  WiFi.localIP().toString().c_str(), ssid);
-  }
+  // } else {       // Station mode 
+  //   Serialprintf("\nStation mode started\nIP Address: %s on %s\n", WiFi.localIP().toString().c_str(), ssid);
+  // }
 }
 ///////////////////////////////////////////////////////////////////////////////
 void setup_Server() {
