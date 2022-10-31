@@ -135,14 +135,15 @@ void scheduler() {
       } 
       break;
   }
-  leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? pulseColour : BLANK_COLOUR;  // pulse the clock :
 
   if(!myClock.isSet()) {
     LEDStartup();
   } 
   else {
+    leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? pulseColour : BLANK_COLOUR;  // pulse the clock :
+    //Serialprintf("pulse:%i\n", leds[PULSE].g);
     FastLED.show();                           // update display every 500 millis
-    //FastLED.delay(1);                       // shouldn't be necessary
+    FastLED.delay(10);                        // shouldn't be necessary
   }
 
   //Serialprintf("Frames:%i\n", FastLED.getFPS());
@@ -159,8 +160,8 @@ void setup_FileSystem() {
       Serialprintf(" File: %-28s size: %8u bytes\n",
                   dir.fileName().c_str(), dir.fileSize());
     }
+    Serialprintf("file system setup\n");
   #endif
-  Serialprintf("file system setup\n");
 }
 ///////////////////////////////////////////////////////////////////////////////
 void setup_FastLED() {
