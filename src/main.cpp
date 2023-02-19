@@ -69,7 +69,7 @@ bool updateTime() {
   if(!myClock.isSet()) return false;
   uint8_t hours = myClock.getHours();
   uint8_t minutes  = myClock.getMinutes();
-  buffchr[0] = (hours < 10) ? ' ': hours/10 + ASCII_ZERO;
+  buffchr[0] = (hours < 10) ? ' ': 1 + ASCII_ZERO;
   buffchr[1] = hours%10 + ASCII_ZERO;
   buffchr[2] = minutes/10 + ASCII_ZERO;
   buffchr[3] = minutes%10 + ASCII_ZERO;

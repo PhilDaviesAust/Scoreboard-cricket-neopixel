@@ -2,7 +2,7 @@ let interval = setInterval(displayTime, 1000);
 
 function displayTime(){				//current time of day in seconds
     const d = new Date();
-    const seconds = d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds(); 
+    let seconds = d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds(); 
     document.getElementById("seconds").value = seconds;
 }
 
