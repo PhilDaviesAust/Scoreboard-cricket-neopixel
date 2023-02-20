@@ -1,4 +1,4 @@
-#define DEBUG_STATE false
+#define DEBUG_STATE true
 #if DEBUG_STATE
   #define Serialprint(...) Serial.print(__VA_ARGS__)
   #define Serialprintln(...) Serial.println(__VA_ARGS__)

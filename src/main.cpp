@@ -99,6 +99,8 @@ void handleUpdate(AsyncWebServerRequest *request) {
   updateTime();
   updateLEDs();
 
+  Serialprintf("buffchar:'%s'\n", buffchr);
+
   char response[144];       // response max chars 139
   const char style[] = "<section style='font-family:verdana;font-size:1em;'><p>Last update: ";
   snprintf (response, sizeof(response),
@@ -121,6 +123,7 @@ void LEDStartup(){
 void scheduler() {
   static uint8_t schedCount;
   static CRGB pulseColour = PULSE_COLOUR;
+
   switch (schedCount) {
     case 0:
       if(updateTemperature()){
@@ -143,7 +146,7 @@ void scheduler() {
     leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? pulseColour : BLANK_COLOUR;  // pulse the clock :
     //Serialprintf("pulse:%i\n", leds[PULSE].g);
     FastLED.show();                           // update display every 500 millis
-    FastLED.delay(10);                        // shouldn't be necessary
+    //FastLED.delay(10);                        // shouldn't be necessary
   }
 
   //Serialprintf("Frames:%i\n", FastLED.getFPS());
