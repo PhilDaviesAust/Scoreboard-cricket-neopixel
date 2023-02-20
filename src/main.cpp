@@ -96,12 +96,14 @@ void handleUpdate(AsyncWebServerRequest *request) {
             request->arg(F("wicket")), request->arg(F("score")),
             request->arg(F("overs")),  request->arg(F("target"))
             );
+  if(atoi(buffchr + 11) == 0) buffchr[13] = ' ';  // blank target display if target=0
+
   updateTime();
   updateLEDs();
 
   Serialprintf("buffchar:'%s'\n", buffchr);
 
-  char response[144];       // response max chars 139
+  char response[144];                             // response max chars 139
   const char style[] = "<section style='font-family:verdana;font-size:1em;'><p>Last update: ";
   snprintf (response, sizeof(response),
     PSTR("%sTime:%s<br>score:%s overs:%s wickets:%s target:%s</p></section>"),
@@ -139,14 +141,13 @@ void scheduler() {
       break;
   }
 
-  if(!myClock.isSet()) {
-    LEDStartup();
-  } 
-  else {
+  if(myClock.isSet()) {
     leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? pulseColour : BLANK_COLOUR;  // pulse the clock :
-    //Serialprintf("pulse:%i\n", leds[PULSE].g);
     FastLED.show();                           // update display every 500 millis
     //FastLED.delay(10);                        // shouldn't be necessary
+  } 
+  else {
+    LEDStartup();    
   }
 
   //Serialprintf("Frames:%i\n", FastLED.getFPS());
@@ -180,21 +181,12 @@ void setup_FastLED() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 void setup_WiFi() {
-  // WiFi.mode(WIFI_STA);
-  // WiFi.begin(ssid, password, CHANNEL);    // try STA mode
-  // int status = WiFi.waitForConnectResult(5000);
-  // Serialprintf("WiFi Status:%i\n", status);
-  // if (status != WL_CONNECTED) {  // can't join network so start AP
-  //  Serialprintf("ssid not available - switch to AP mode\n");
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(server_IP, gateway, subnet);
     WiFi.softAP(ssid, password, CHANNEL);
-    // Access Point mode
+
     Serialprintf("WiFi Access Point established! IP address: %s on %s\n", \
                   WiFi.softAPIP().toString().c_str(), ssid);
-  // } else {       // Station mode 
-  //   Serialprintf("\nStation mode started\nIP Address: %s on %s\n", WiFi.localIP().toString().c_str(), ssid);
-  // }
 }
 ///////////////////////////////////////////////////////////////////////////////
 void setup_Server() {

@@ -1,4 +1,4 @@
-#define DEBUG_STATE true
+#define DEBUG_STATE false
 #if DEBUG_STATE
   #define Serialprint(...) Serial.print(__VA_ARGS__)
   #define Serialprintln(...) Serial.println(__VA_ARGS__)
@@ -30,7 +30,7 @@
 #define PULSE           84      // clock pulse starting LED number
 #define PULSE_WIDTH     5       // number of LEDs in pulse -1
 #define LED_VOLTAGE     12      // LED strip voltage
-#define LED_CURRENT     8000   // LED strip max current (milliamps)
+#define LED_CURRENT     8000    // LED strip max current (milliamps)
 #define CHANNEL         1
 #define ASCII_ZERO      48
 #define SCHED_INT       500     // scheduler time interval (ms)
