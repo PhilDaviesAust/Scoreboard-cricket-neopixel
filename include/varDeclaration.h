@@ -1,4 +1,4 @@
-#define DEBUG_STATE false
+#define DEBUG_STATE true
 #if DEBUG_STATE
   #define Serialprint(...) Serial.print(__VA_ARGS__)
   #define Serialprintln(...) Serial.println(__VA_ARGS__)
@@ -13,9 +13,9 @@
 
 #define SCL_PIN         D1      // DHT12 clock pin (GPIO5)
 #define SDA_PIN         D2      // DHT12 data pin (GPIO4)
-#define DATA_PIN1       D5
-#define DATA_PIN2       D6
-#define DATA_PIN3       D7
+#define DATA_PIN1       D5      // LED strip 1 (GPIO14)
+#define DATA_PIN2       D6      // LED strip 2 (GPIO12)
+#define DATA_PIN3       D7      // LED strip 3 (GPIO13)
 #define RGB_ORDER       RGB
 #define CHIPSET         WS2812B  // best match for WS2815
 #define SEGMENTS        7
@@ -31,7 +31,8 @@
 #define PULSE_WIDTH     5       // number of LEDs in pulse -1
 #define LED_VOLTAGE     12      // LED strip voltage
 #define LED_CURRENT     8000    // LED strip max current (milliamps)
-#define CHANNEL         1
+#define CHANNEL         1       // WIFI channel
+
 #define ASCII_ZERO      48
 #define SCHED_INT       500     // scheduler time interval (ms)
 
@@ -46,7 +47,7 @@ AsyncWebServer          server(80);
 DHT12                   dht12;  // use default pins SCL=D1 SDA=D2
 ESPClock                myClock;
 
-const uint8_t seg_mapping_LED[13] = {   //used by FastLED
+const uint8_t seg_mapping_LED[13] = {
 //  XGEDCBAF      Segments
   0b00111111,     // 0  Digit 0  ascii 48
   0b00001100,     // 1  Digit 1  ascii 49        AA
@@ -57,15 +58,15 @@ const uint8_t seg_mapping_LED[13] = {   //used by FastLED
   0b01111011,     // 6  Digit 6  ascii 54      E    C
   0b00001110,     // 7  Digit 7  ascii 55        DD
   0b01111111,     // 8  Digit 8  ascii 56
-  0b01011111,     // 9  Digit 9  ascii 57
-  0b00000000,     // 10 blank    ascii 32
+  0b01011111,     // 9  Digit 9  ascii 57     wiring sequence FABCDEG
+  0b00000000,     // 10 blank    ascii 32     refer WiringLayout.pdf
   0b01000111,     // 11 ° degree ascii 59 ;
   0b00110011      // 12 C        ascii 60 <
 };
-const char    deg = ';';      // ascii 59
-const char    C   = '<';      // ascii 60
+const char    deg = ';';        // ascii 59
+const char    C   = '<';        // ascii 60
 
-const uint16_t char_mapping_LED[14] = {
+const uint16_t char_mapping_LED[14] = { //start LED number for each character
   0,    // 0 hours * 10     temp * 10
   42,   // 1 hours * 1      temp * 1
   90,   // 2 minutes * 10   deg
@@ -82,11 +83,11 @@ const uint16_t char_mapping_LED[14] = {
   552   // 13 target * 1
 };
 
-char           buffchr[15];            // character buffer for character display
+char           buffchr[15];     // character buffer for character display
 
 //                      hours  minutes  wicket   score        overs   target           
 // Buffchr[15]	        H1	H2	M1	M2	 W1	W2	 S1 S2  S3	  O1	O2	T1	T2	T3	\0
 // char_mapping_LED[14] 0   42	90	132	 174 216 258 300 342	384	426	468 510	552			
 // PULSE                84
 
-uint8_t        brightness  = 128;      // display brightness level
+uint8_t        brightness  = 128;  // display brightness level
