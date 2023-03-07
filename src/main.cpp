@@ -1,5 +1,5 @@
 /* Scoreboard Controller
-    based on ESP8266 (Wemos D1 mini) and WS2815 LED strip
+    based on ESP8266 (Wemos D1 mini) and WS2812B/WS2815 LED strip
     01-01-2022   
 */
 #define FASTLED_INTERRUPT_RETRY_COUNT 1
@@ -142,7 +142,7 @@ void scheduler() {
   }
 
   if(myClock.isSet()) {
-    leds(PULSE, PULSE + PULSE_WIDTH) = (schedCount % 2 == 0) ? pulseColour : BLANK_COLOUR;  // pulse the clock :
+    leds(PULSE, PULSE + PULSE_WIDTH - 1) = (schedCount % 2 == 0) ? pulseColour : BLANK_COLOUR;  // pulse the clock :
     FastLED.show();                     // update display every 500 millis
     //FastLED.delay(10);                 // hack to resend data - shouldn't be necessary
   } 

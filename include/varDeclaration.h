@@ -16,8 +16,11 @@
 #define DATA_PIN1       D5      // LED strip 1 (GPIO14)
 #define DATA_PIN2       D6      // LED strip 2 (GPIO12)
 #define DATA_PIN3       D7      // LED strip 3 (GPIO13)
+
+#define CHIPSET         WS2812B // best match for WS2815
+#define LED_VOLTAGE     5       // LED strip voltage
+#define LED_CURRENT     8000    // LED strip max current (milliamps)
 #define RGB_ORDER       RGB
-#define CHIPSET         WS2812B  // best match for WS2815
 #define SEGMENTS        7
 #define LEDS_IN_SEGMENT 6
 #define NUM_STRIPS      3
@@ -28,9 +31,7 @@
 #define STRIP2_START    174     // LED strip 2 starting LED number
 #define STRIP3_START    384     // LED strip 3 starting LED number
 #define PULSE           84      // clock pulse starting LED number
-#define PULSE_WIDTH     5       // number of LEDs in pulse -1
-#define LED_VOLTAGE     12      // LED strip voltage
-#define LED_CURRENT     8000    // LED strip max current (milliamps)
+#define PULSE_WIDTH     6       // number of LEDs in pulse
 #define CHANNEL         1       // WIFI channel
 
 #define ASCII_ZERO      48
