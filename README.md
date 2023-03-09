@@ -1,4 +1,4 @@
-### Scoreboard-esp01-neopixel
+### Scoreboard-cricket-neopixel
   ![Scoreboard](scoreboard.jpg)
 
 Cricket Scoreboard project using:
