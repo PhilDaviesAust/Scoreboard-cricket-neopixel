@@ -9,7 +9,7 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
-#include "LittleFS.h"
+#include <LittleFS.h>
 #include <FastLED.h>
 #include <WEMOS_DHT12.h>
 #include "ESPClock.h"
@@ -200,7 +200,7 @@ void setup() {
   setup_FastLED();                      // fastLED initialisation
   setup_FileSystem();                   // start LittleFS file system
   setup_WiFi();                         // Start WiFi
-  if(WiFi.getMode() == WIFI_AP) AsyncElegantOTA.begin(&server); // Start AsyncElegantOTA
+  AsyncElegantOTA.begin(&server); // Start AsyncElegantOTA
   setup_Server();                       // Start web server
 }
 ///////////////////////////////////////////////////////////////////////////////
