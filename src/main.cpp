@@ -200,7 +200,7 @@ void setup() {
   setup_FastLED();                      // fastLED initialisation
   setup_FileSystem();                   // start LittleFS file system
   setup_WiFi();                         // Start WiFi
-  AsyncElegantOTA.begin(&server); // Start AsyncElegantOTA
+  AsyncElegantOTA.begin(&server);       // Start AsyncElegantOTA
   setup_Server();                       // Start web server
 }
 ///////////////////////////////////////////////////////////////////////////////
